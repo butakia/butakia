@@ -9,7 +9,7 @@ import { Book, BookChapter, SiteSettings } from "@/lib/types";
 import Logo from "../Logo";
 import { saveReadingProgressAction, saveReaderPreferenceAction, ReaderPreferenceInput, toggleBookFavoriteAction } from "@/lib/books-actions";
 import ReaderControls, { ReaderPrefs } from "./ReaderControls";
-import PdfPageRenderer from "./PdfPageRenderer";
+import PdfPageRenderer, { getPdfPageAspectRatio } from "./PdfPageRenderer";
 import HighlightableText from "./HighlightableText";
 import NotesPanel from "./NotesPanel";
 import BookFinishedScreen from "./BookFinishedScreen";
@@ -280,6 +280,23 @@ export default function BookReader({
   // driven off this, so there's a single source of truth instead of two guesses that can
   // drift apart (which was producing wildly different page counts between attempts).
   const [containerSize, setContainerSize] = useState<{ width: number; height: number } | null>(null);
+  // The real width/height ratio of the source PDF's own pages — used to shape the
+  // flip-mode page box to match instead of the generic text-reading box (which comes
+  // out squashed/oversized for an actual scanned book page).
+  const [pdfPageAspect, setPdfPageAspect] = useState<number | null>(null);
+  useEffect(() => {
+    if (!isPdf || !book.pdfUrl) return;
+    let cancelled = false;
+    getPdfPageAspectRatio(book.pdfUrl)
+      .then((ratio) => {
+        if (!cancelled) setPdfPageAspect(ratio);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isPdf, book.pdfUrl]);
   // Highlighting needs native touch text-selection, which "touch-action: none" (below)
   // deliberately blocks so the page-turn gesture doesn't fight the browser for the touch.
   // This mode temporarily hands touch back to the browser so long-press-to-select works,
@@ -356,8 +373,20 @@ export default function BookReader({
     const update = () => {
       const rect = el.getBoundingClientRect();
       if (rect.width <= 0 || rect.height <= 0) return;
-      const width = Math.round(rect.width);
-      const height = Math.round(rect.height);
+      let width = rect.width;
+      let height = rect.height;
+      // Contain-fit the available box to the PDF's real page proportions instead of
+      // using it as-is — otherwise the page renders squashed into whatever generic
+      // shape the text-reading box happens to be.
+      if (isPdf && pdfPageAspect) {
+        if (width / height > pdfPageAspect) {
+          width = height * pdfPageAspect;
+        } else {
+          height = width / pdfPageAspect;
+        }
+      }
+      width = Math.round(width);
+      height = Math.round(height);
       const last = lastMeasuredSizeRef.current;
       // Compared against a ref (not the `containerSize` state) so this never calls
       // setState with a "new" object carrying the same numbers — that was creating a
@@ -372,7 +401,7 @@ export default function BookReader({
     const ro = new ResizeObserver(update);
     ro.observe(el);
     return () => ro.disconnect();
-  }, [isFullscreen, prefs.textWidth]);
+  }, [isFullscreen, prefs.textWidth, isPdf, pdfPageAspect]);
 
   // react-pageflip's own drag system makes the page visually "follow the finger" while
   // dragging, then picks a fold corner (top/bottom) based on exactly where the touch
@@ -934,7 +963,7 @@ export default function BookReader({
 
       <div
         ref={flipWrapperRef}
-        className="relative mx-auto w-full min-h-0 flex-1 overflow-hidden"
+        className="relative mx-auto flex w-full min-h-0 flex-1 items-center justify-center overflow-hidden"
         style={{
           // In fullscreen the surrounding screen is much bigger than the capped reading
           // width, so a user's natural swipe (anywhere across that big black canvas)

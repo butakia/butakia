@@ -14,6 +14,19 @@ function loadPdfJs() {
   return pdfjsLibPromise;
 }
 
+// The flip-mode page box is otherwise sized for text reading (roughly fills the
+// available height, width capped separately) — nothing like a real book page's
+// proportions. Reading the actual PDF page's own width/height lets the reader
+// size that box to match instead of stretching/squashing the page into a
+// mismatched shape.
+export async function getPdfPageAspectRatio(pdfUrl: string): Promise<number> {
+  const pdfjsLib = await loadPdfJs();
+  const doc = await pdfjsLib.getDocument({ url: pdfUrl }).promise;
+  const page = await doc.getPage(1);
+  const viewport = page.getViewport({ scale: 1 });
+  return viewport.width / viewport.height;
+}
+
 export default function PdfPageRenderer({ pdfUrl, pageNumber }: { pdfUrl: string; pageNumber: number }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [loading, setLoading] = useState(true);
