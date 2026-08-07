@@ -31,11 +31,22 @@ export default function PdfPageRenderer({ pdfUrl, pageNumber }: { pdfUrl: string
         const viewport = page.getViewport({ scale: 1.5 });
         const canvas = canvasRef.current;
         if (!canvas) return;
-        canvas.width = viewport.width;
-        canvas.height = viewport.height;
+
+        // The canvas's pixel buffer needs to match physical screen pixels, not CSS
+        // pixels, or high-DPI screens (most laptops/phones today) stretch this low-res
+        // bitmap to fill the display size and it comes out visibly blurry. Sizing the
+        // buffer by devicePixelRatio while keeping the CSS size at the plain viewport
+        // dimensions decouples "how sharp" from "how big it lays out".
+        const outputScale = window.devicePixelRatio || 1;
+        canvas.width = Math.floor(viewport.width * outputScale);
+        canvas.height = Math.floor(viewport.height * outputScale);
+        canvas.style.width = `${Math.floor(viewport.width)}px`;
+        canvas.style.height = `${Math.floor(viewport.height)}px`;
+
         const ctx = canvas.getContext("2d");
         if (!ctx) return;
-        await page.render({ canvasContext: ctx, viewport, canvas }).promise;
+        const transform = outputScale !== 1 ? [outputScale, 0, 0, outputScale, 0, 0] : undefined;
+        await page.render({ canvasContext: ctx, viewport, canvas, transform }).promise;
       } catch {
         // page failed to render; leave canvas blank
       } finally {
