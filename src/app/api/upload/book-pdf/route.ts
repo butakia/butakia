@@ -25,7 +25,17 @@ export async function POST(req: NextRequest) {
 
   const filename = `${crypto.randomUUID()}.pdf`;
   const bytes = Buffer.from(await file.arrayBuffer());
-  const url = await uploadPublicFile(bytes, filename, { resourceType: "raw" });
+
+  let url: string;
+  try {
+    url = await uploadPublicFile(bytes, filename, { resourceType: "raw" });
+  } catch (err) {
+    console.error("PDF upload failed:", err);
+    return NextResponse.json(
+      { error: "No se pudo subir el PDF. Verifica la configuración de almacenamiento del servidor." },
+      { status: 500 },
+    );
+  }
 
   let pageCount: number | undefined;
   try {

@@ -27,6 +27,9 @@ export default function LiteraryAuthorForm({
   );
   const [bio, setBio] = useState(initialBio ?? "");
   const [verified, setVerified] = useState(initialVerified);
+  // Guards against submitting before the photo finishes uploading — saving mid-upload
+  // used to persist before the real URL came back, silently dropping the photo.
+  const [uploading, setUploading] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,7 +42,13 @@ export default function LiteraryAuthorForm({
   return (
     <form onSubmit={handleSubmit} className="max-w-lg">
       <div className="mb-6">
-        <ImageDropzone label="Foto del autor" shape="circle" initialUrl={photoUrl ?? undefined} onChange={setPhotoUrl} />
+        <ImageDropzone
+          label="Foto del autor"
+          shape="circle"
+          initialUrl={photoUrl ?? undefined}
+          onChange={setPhotoUrl}
+          onUploadingChange={setUploading}
+        />
       </div>
       <div>
         <label className="mb-1.5 block text-sm text-white/70">Biografía</label>
@@ -70,11 +79,11 @@ export default function LiteraryAuthorForm({
 
       <button
         type="submit"
-        disabled={isPending}
+        disabled={isPending || uploading}
         className="mt-6 flex items-center gap-2 rounded-lg bg-accent px-6 py-3 font-semibold text-white transition-transform hover:scale-[1.02] active:scale-95 disabled:opacity-50"
       >
         <Save size={18} />
-        {isPending ? "Guardando..." : "Guardar cambios"}
+        {uploading ? "Subiendo imagen..." : isPending ? "Guardando..." : "Guardar cambios"}
       </button>
     </form>
   );

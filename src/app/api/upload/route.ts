@@ -21,7 +21,15 @@ export async function POST(req: NextRequest) {
   const ext = file.type.split("/")[1] === "jpeg" ? "jpg" : file.type.split("/")[1];
   const filename = `${crypto.randomUUID()}.${ext}`;
   const bytes = Buffer.from(await file.arrayBuffer());
-  const url = await uploadPublicFile(bytes, filename, { resourceType: "image" });
 
-  return NextResponse.json({ url });
+  try {
+    const url = await uploadPublicFile(bytes, filename, { resourceType: "image" });
+    return NextResponse.json({ url });
+  } catch (err) {
+    console.error("Image upload failed:", err);
+    return NextResponse.json(
+      { error: "No se pudo subir la imagen. Verifica la configuración de almacenamiento del servidor." },
+      { status: 500 },
+    );
+  }
 }

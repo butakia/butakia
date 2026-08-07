@@ -10,6 +10,7 @@ export default function ImageDropzone({
   shape = "square",
   initialUrl,
   onChange,
+  onUploadingChange,
 }: {
   label: string;
   required?: boolean;
@@ -17,6 +18,7 @@ export default function ImageDropzone({
   shape?: "square" | "circle";
   initialUrl?: string;
   onChange?: (url: string | null) => void;
+  onUploadingChange?: (uploading: boolean) => void;
 }) {
   const [preview, setPreview] = useState<string | null>(initialUrl ?? null);
   const [dragOver, setDragOver] = useState(false);
@@ -29,6 +31,7 @@ export default function ImageDropzone({
     const localUrl = URL.createObjectURL(file);
     setPreview(localUrl);
     setUploading(true);
+    onUploadingChange?.(true);
     try {
       const formData = new FormData();
       formData.append("file", file);
@@ -43,6 +46,7 @@ export default function ImageDropzone({
       onChange?.(null);
     } finally {
       setUploading(false);
+      onUploadingChange?.(false);
       URL.revokeObjectURL(localUrl);
     }
   };

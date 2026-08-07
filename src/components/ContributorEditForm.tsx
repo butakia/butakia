@@ -29,6 +29,9 @@ export default function ContributorEditForm({
   const [avatarUrl, setAvatarUrl] = useState<string | null>(contributor.avatarUrl ?? null);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  // Guards against submitting before the photo finishes uploading — saving mid-upload
+  // used to persist before the real URL came back, silently dropping the photo.
+  const [uploading, setUploading] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,6 +62,7 @@ export default function ContributorEditForm({
           aspect="aspect-square"
           initialUrl={avatarUrl ?? undefined}
           onChange={setAvatarUrl}
+          onUploadingChange={setUploading}
         />
       </div>
 
@@ -114,11 +118,11 @@ export default function ContributorEditForm({
 
       <button
         type="submit"
-        disabled={isPending}
+        disabled={isPending || uploading}
         className="mt-2 flex items-center justify-center gap-2 rounded-lg bg-accent py-3 font-semibold text-white transition-transform hover:scale-[1.02] active:scale-95 disabled:opacity-50"
       >
         <Save size={18} />
-        {isPending ? "Guardando..." : "Guardar cambios"}
+        {uploading ? "Subiendo imagen..." : isPending ? "Guardando..." : "Guardar cambios"}
       </button>
     </form>
   );

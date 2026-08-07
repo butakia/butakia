@@ -42,6 +42,9 @@ export default function BlogPostForm({ initial }: { initial?: BlogPost }) {
   );
   const [seoTitle, setSeoTitle] = useState(initial?.seoTitle ?? "");
   const [seoDescription, setSeoDescription] = useState(initial?.seoDescription ?? "");
+  // Guards against submitting before an image finishes uploading — saving mid-upload
+  // used to persist before the real URL came back, silently dropping the cover.
+  const [uploading, setUploading] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,6 +78,7 @@ export default function BlogPostForm({ initial }: { initial?: BlogPost }) {
         aspect="aspect-video"
         initialUrl={coverImage ?? undefined}
         onChange={setCoverImage}
+        onUploadingChange={setUploading}
       />
 
       <Field label="Título *">
@@ -153,11 +157,11 @@ export default function BlogPostForm({ initial }: { initial?: BlogPost }) {
 
       <button
         type="submit"
-        disabled={isPending || !title.trim()}
+        disabled={isPending || uploading || !title.trim()}
         className="flex items-center justify-center gap-2 rounded-lg bg-accent px-4 py-3 text-sm font-bold text-white transition-transform hover:scale-[1.01] disabled:opacity-40"
       >
         <Save size={16} />
-        {isPending ? "Guardando..." : isEdit ? "Guardar cambios" : "Publicar artículo"}
+        {uploading ? "Subiendo imagen..." : isPending ? "Guardando..." : isEdit ? "Guardar cambios" : "Publicar artículo"}
       </button>
     </form>
   );

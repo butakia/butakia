@@ -69,6 +69,10 @@ export default function SiteSettingsForm({ settings }: { settings: SiteSettings 
   const [contactPhone, setContactPhone] = useState(settings.contactPhone ?? "");
   const [isPending, startTransition] = useTransition();
   const [saved, setSaved] = useState(false);
+  // Guards against submitting before an image finishes uploading — saving mid-upload
+  // used to persist before the real URL came back, silently dropping the image.
+  const [uploadingCount, setUploadingCount] = useState(0);
+  const handleUploadingChange = (uploading: boolean) => setUploadingCount((c) => c + (uploading ? 1 : -1));
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -141,6 +145,7 @@ export default function SiteSettingsForm({ settings }: { settings: SiteSettings 
               aspect="aspect-square"
               initialUrl={logoUrl ?? undefined}
               onChange={setLogoUrl}
+              onUploadingChange={handleUploadingChange}
             />
             <p className="mt-1 max-w-[7rem] text-[10px] text-white/30">
               Si lo dejas vacío se usa el logo por defecto de Butakia.
@@ -153,6 +158,7 @@ export default function SiteSettingsForm({ settings }: { settings: SiteSettings 
               aspect="aspect-square"
               initialUrl={faviconUrl ?? undefined}
               onChange={setFaviconUrl}
+              onUploadingChange={handleUploadingChange}
             />
             <p className="mt-1 max-w-[7rem] text-[10px] text-white/30">
               Ícono de la pestaña del navegador.
@@ -194,6 +200,7 @@ export default function SiteSettingsForm({ settings }: { settings: SiteSettings 
               aspect="aspect-video"
               initialUrl={bannerUrl ?? undefined}
               onChange={setBannerUrl}
+              onUploadingChange={handleUploadingChange}
             />
           </div>
           <div className="min-w-[200px] flex-1">
@@ -655,11 +662,11 @@ export default function SiteSettingsForm({ settings }: { settings: SiteSettings 
 
       <button
         type="submit"
-        disabled={isPending}
+        disabled={isPending || uploadingCount > 0}
         className="mt-2 flex w-fit items-center gap-2 rounded-lg bg-accent px-6 py-3 font-semibold text-white transition-transform hover:scale-[1.02] active:scale-95 disabled:opacity-50"
       >
         <Save size={18} />
-        {isPending ? "Guardando..." : "Guardar cambios"}
+        {uploadingCount > 0 ? "Subiendo imagen..." : isPending ? "Guardando..." : "Guardar cambios"}
       </button>
       {saved && <p className="text-sm text-accent">Guardado correctamente.</p>}
     </form>

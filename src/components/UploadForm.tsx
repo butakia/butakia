@@ -128,6 +128,10 @@ export default function UploadForm({
   const [submitted, setSubmitted] = useState(false);
   const [pendingId, setPendingId] = useState<string | undefined>(undefined);
   const [isPending, startTransition] = useTransition();
+  // Guards against submitting before an image finishes uploading — saving mid-upload
+  // used to persist before the real URL came back, silently dropping the image.
+  const [uploadingCount, setUploadingCount] = useState(0);
+  const handleUploadingChange = (uploading: boolean) => setUploadingCount((c) => c + (uploading ? 1 : -1));
 
   const toggleGenre = (g: string) => {
     setGenres((prev) => (prev.includes(g) ? prev.filter((x) => x !== g) : [...prev, g]));
@@ -149,7 +153,8 @@ export default function UploadForm({
     Boolean(posterUrl) &&
     filledEntries.length > 0 &&
     allFilledConfirmed &&
-    accepted;
+    accepted &&
+    uploadingCount === 0;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -275,7 +280,12 @@ export default function UploadForm({
         </div>
 
         <div className="grid gap-6 md:grid-cols-[200px_1fr]">
-          <ImageDropzone label="Portada" required onChange={setPosterUrl} />
+          <ImageDropzone
+            label="Portada"
+            required
+            onChange={setPosterUrl}
+            onUploadingChange={handleUploadingChange}
+          />
 
           <div className="flex flex-col gap-5">
             <div>
@@ -365,6 +375,7 @@ export default function UploadForm({
                 label="Imagen de fondo (backdrop)"
                 aspect="aspect-video"
                 onChange={setBackdropUrl}
+                onUploadingChange={handleUploadingChange}
               />
             </div>
 

@@ -37,6 +37,9 @@ export default function AuthorProfileManager({
   const [bio, setBio] = useState(profile?.bio ?? "");
   const [trajectory, setTrajectory] = useState(profile?.trajectory ?? "");
   const [saved, setSaved] = useState(false);
+  // Guards against submitting before the photo finishes uploading — saving mid-upload
+  // used to persist before the real URL came back, silently dropping the photo.
+  const [uploading, setUploading] = useState(false);
 
   if (!profile) {
     const handleClaim = (e: React.FormEvent) => {
@@ -111,7 +114,13 @@ export default function AuthorProfileManager({
 
       <form onSubmit={handleSave} className="max-w-lg rounded-xl border border-white/10 bg-white/[0.03] p-5">
         <div className="mb-5">
-          <ImageDropzone label="Foto de autor" shape="circle" initialUrl={photoUrl ?? undefined} onChange={setPhotoUrl} />
+          <ImageDropzone
+            label="Foto de autor"
+            shape="circle"
+            initialUrl={photoUrl ?? undefined}
+            onChange={setPhotoUrl}
+            onUploadingChange={setUploading}
+          />
         </div>
         <div className="mb-4">
           <label className="mb-1.5 block text-sm text-white/70">Biografía corta</label>
@@ -136,11 +145,11 @@ export default function AuthorProfileManager({
         </div>
         <button
           type="submit"
-          disabled={isPending}
+          disabled={isPending || uploading}
           className="mt-4 flex items-center gap-2 rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-white transition-transform hover:scale-[1.02] active:scale-95 disabled:opacity-50"
         >
           <Save size={16} />
-          {isPending ? "Guardando..." : "Guardar cambios"}
+          {uploading ? "Subiendo imagen..." : isPending ? "Guardando..." : "Guardar cambios"}
         </button>
         {saved && <p className="mt-2 text-xs text-accent">Guardado correctamente.</p>}
       </form>

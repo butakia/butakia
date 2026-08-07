@@ -77,6 +77,11 @@ export default function AdminTitleForm({
   const [backdrop, setBackdrop] = useState<string | null>(
     initial && isRealImage(initial.backdrop) ? initial.backdrop : null
   );
+  // Guards against submitting before an image finishes uploading — the form used to
+  // let "Guardar" fire mid-upload, saving before the real URL came back and silently
+  // falling back to no poster at all.
+  const [uploadingCount, setUploadingCount] = useState(0);
+  const handleUploadingChange = (uploading: boolean) => setUploadingCount((c) => c + (uploading ? 1 : -1));
   const [trivia, setTrivia] = useState(initial?.trivia?.join("\n") ?? "");
   const [franchise, setFranchise] = useState(initial?.franchise ?? "");
   const [seoTitle, setSeoTitle] = useState(initial?.seoTitle ?? "");
@@ -170,12 +175,18 @@ export default function AdminTitleForm({
       </div>
 
       <div className="mb-6 flex flex-wrap gap-6">
-        <ImageDropzone label="Portada" initialUrl={poster ?? undefined} onChange={setPoster} />
+        <ImageDropzone
+          label="Portada"
+          initialUrl={poster ?? undefined}
+          onChange={setPoster}
+          onUploadingChange={handleUploadingChange}
+        />
         <ImageDropzone
           label="Imagen de fondo"
           aspect="aspect-video"
           initialUrl={backdrop ?? undefined}
           onChange={setBackdrop}
+          onUploadingChange={handleUploadingChange}
         />
       </div>
 
@@ -450,11 +461,11 @@ export default function AdminTitleForm({
 
       <button
         type="submit"
-        disabled={isPending}
+        disabled={isPending || uploadingCount > 0}
         className="mt-8 flex items-center gap-2 rounded-lg bg-accent px-6 py-3 font-semibold text-white transition-transform hover:scale-[1.02] active:scale-95 disabled:opacity-50"
       >
         <Save size={18} />
-        {isPending ? "Guardando..." : isEdit ? "Guardar cambios" : "Crear título"}
+        {uploadingCount > 0 ? "Subiendo imagen..." : isPending ? "Guardando..." : isEdit ? "Guardar cambios" : "Crear título"}
       </button>
     </form>
   );

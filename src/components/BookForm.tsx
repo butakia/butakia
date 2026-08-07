@@ -54,6 +54,10 @@ export default function BookForm({
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const isEdit = Boolean(initial);
+  // Guards against submitting before an image finishes uploading — saving mid-upload
+  // used to persist before the real URL came back, silently dropping the cover.
+  const [uploadingCount, setUploadingCount] = useState(0);
+  const handleUploadingChange = (uploading: boolean) => setUploadingCount((c) => c + (uploading ? 1 : -1));
 
   const [title, setTitle] = useState(initial?.title ?? "");
   const [subtitle, setSubtitle] = useState(initial?.subtitle ?? "");
@@ -187,7 +191,12 @@ export default function BookForm({
   return (
     <form onSubmit={handleSubmit} className="max-w-3xl">
       <div className="mb-6">
-        <ImageDropzone label="Portada" initialUrl={cover ?? undefined} onChange={setCover} />
+        <ImageDropzone
+          label="Portada"
+          initialUrl={cover ?? undefined}
+          onChange={setCover}
+          onUploadingChange={handleUploadingChange}
+        />
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
@@ -629,11 +638,11 @@ export default function BookForm({
 
       <button
         type="submit"
-        disabled={isPending}
+        disabled={isPending || uploadingCount > 0}
         className="mt-4 flex items-center gap-2 rounded-lg bg-accent px-6 py-3 font-semibold text-white transition-transform hover:scale-[1.02] active:scale-95 disabled:opacity-50"
       >
         <Save size={18} />
-        {isPending ? "Guardando..." : isEdit ? "Guardar cambios" : "Publicar libro"}
+        {uploadingCount > 0 ? "Subiendo imagen..." : isPending ? "Guardando..." : isEdit ? "Guardar cambios" : "Publicar libro"}
       </button>
     </form>
   );
