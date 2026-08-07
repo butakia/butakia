@@ -101,7 +101,7 @@ export interface TitleFormInput {
 export async function createTitleAction(input: TitleFormInput) {
   await requireAdmin();
   const slug = slugify(input.title);
-  await prisma.title.create({
+  const created = await prisma.title.create({
     data: {
       slug,
       title: input.title,
@@ -136,6 +136,7 @@ export async function createTitleAction(input: TitleFormInput) {
     },
   });
   revalidateCatalog();
+  return { id: created.id, slug: created.slug };
 }
 
 export async function updateTitleAction(slug: string, input: TitleFormInput) {

@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Film, Tv, Save, Star, Search } from "lucide-react";
-import { createTitleAction, updateTitleAction } from "@/lib/actions";
+import { createTitleAction, updateTitleAction, addSeasonAction } from "@/lib/actions";
 import { Title } from "@/lib/types";
 import { GENRE_OPTIONS, GENRE_LABEL_ES } from "@/lib/genres";
 import ImageDropzone from "@/components/ImageDropzone";
@@ -54,6 +54,10 @@ export default function AdminTitleForm({
 
   const [title, setTitle] = useState(initial?.title ?? "");
   const [type, setType] = useState<"movie" | "series">(initial?.type ?? "movie");
+  // Only asked when creating a brand-new series — pre-creates that many empty seasons
+  // so they already show up in the season/episode switcher when someone opens the
+  // series, instead of the admin having to add each season one by one afterward.
+  const [seasonCount, setSeasonCount] = useState("1");
   const [year, setYear] = useState(String(initial?.year ?? new Date().getFullYear()));
   const [duration, setDuration] = useState(initial?.duration ?? "");
   const [rating, setRating] = useState(String(initial?.rating ?? 0));
@@ -147,8 +151,18 @@ export default function AdminTitleForm({
     startTransition(async () => {
       if (isEdit && initial) {
         await updateTitleAction(initial.slug, payload);
-      } else {
-        await createTitleAction(payload);
+        router.push("/admin/contenido");
+        return;
+      }
+
+      const created = await createTitleAction(payload);
+      if (type === "series") {
+        const count = Math.max(1, Number(seasonCount) || 1);
+        for (let n = 1; n <= count; n++) {
+          await addSeasonAction(created.id, n);
+        }
+        router.push(`/admin/contenido/${created.slug}/editar`);
+        return;
       }
       router.push("/admin/contenido");
     });
@@ -173,6 +187,24 @@ export default function AdminTitleForm({
           </button>
         ))}
       </div>
+
+      {type === "series" && !isEdit && (
+        <div className="mb-6 max-w-xs">
+          <Field label="¿Cuántas temporadas tiene?">
+            <input
+              type="number"
+              min={1}
+              value={seasonCount}
+              onChange={(e) => setSeasonCount(e.target.value)}
+              className={inputCls}
+            />
+          </Field>
+          <p className="mt-1.5 text-xs text-white/40">
+            Se crean vacías al guardar — luego les agregas los episodios desde la pantalla
+            siguiente.
+          </p>
+        </div>
+      )}
 
       <div className="mb-6 flex flex-wrap gap-6">
         <ImageDropzone

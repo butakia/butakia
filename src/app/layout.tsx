@@ -3,7 +3,6 @@ import { cookies } from "next/headers";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import RouteLoadingOverlay from "@/components/RouteLoadingOverlay";
-import ClientErrorBanner from "@/components/ClientErrorBanner";
 import { AuthProvider } from "@/components/AuthProvider";
 import { SiteSettingsProvider } from "@/components/SiteSettingsProvider";
 import { LocaleProvider } from "@/components/LocaleProvider";
@@ -140,7 +139,6 @@ export default async function RootLayout({
           >
             <LocaleProvider locale={locale}>
               <RouteLoadingOverlay />
-              <ClientErrorBanner />
               <AdPopupLoader showAds={showAds} />
               <VisitTracker />
               {children}
