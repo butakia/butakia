@@ -19,26 +19,27 @@ export default function Logo({
     <Link
       href={subtitle ? "/libros" : "/"}
       aria-label={`Ir al inicio de ${siteName}`}
-      className={`group flex items-center gap-2 transition-transform duration-200 hover:scale-[1.03] active:scale-95 ${className ?? ""}`}
+      className={`group flex min-w-0 items-center gap-1.5 transition-transform duration-200 hover:scale-[1.03] active:scale-95 sm:gap-2 ${className ?? ""}`}
     >
       {logoUrl ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={logoUrl}
           alt={siteName}
-          className="h-9 w-9 shrink-0 rounded-lg object-cover shadow-[0_2px_10px_-2px_rgba(229,9,20,0.6)]"
+          className="h-8 w-8 shrink-0 rounded-lg object-cover shadow-[0_2px_10px_-2px_rgba(229,9,20,0.6)] sm:h-9 sm:w-9"
         />
       ) : (
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-accent to-accent-hover shadow-[0_2px_10px_-2px_rgba(229,9,20,0.6)]">
-          <Armchair size={20} className="text-white" strokeWidth={2.5} />
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-accent to-accent-hover shadow-[0_2px_10px_-2px_rgba(229,9,20,0.6)] sm:h-9 sm:w-9">
+          <Armchair size={18} className="text-white sm:hidden" strokeWidth={2.5} />
+          <Armchair size={20} className="hidden text-white sm:block" strokeWidth={2.5} />
         </span>
       )}
       {!iconOnly && (
-        <span className="flex flex-col leading-none">
+        <span className="flex min-w-0 flex-col leading-none">
           {logoUrl ? (
-            <span className="text-2xl font-black tracking-tight text-white">{siteName}</span>
+            <span className="truncate text-lg font-black tracking-tight text-white sm:text-2xl">{siteName}</span>
           ) : (
-            <span className="flex items-baseline text-2xl font-black tracking-tight">
+            <span className="flex items-baseline text-lg font-black tracking-tight sm:text-2xl">
               <span className="text-white">Buta</span>
               <span className="text-accent">kia</span>
             </span>

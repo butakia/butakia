@@ -17,6 +17,11 @@ export default function PlayerLanguageSelector({
   onSelect: (languageId: string, server: PlaybackServer) => void;
 }) {
   const [openId, setOpenId] = useState<string | null>(null);
+  // On mobile, showing all languages stacked full-width ate a lot of vertical space
+  // before the player even started — collapsed by default there, showing only the
+  // active language/server plus a toggle to reveal the rest. Desktop is unaffected
+  // (row layout, not collapsed).
+  const [expanded, setExpanded] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -42,8 +47,9 @@ export default function PlayerLanguageSelector({
         const isActive = lang.id === activeLanguageId;
         const isOpen = openId === lang.id;
         const isAvailable = lang.servers.length > 0;
+        const hiddenOnMobile = !expanded && !isActive;
         return (
-          <div key={lang.id} className="relative w-full sm:w-auto">
+          <div key={lang.id} className={`relative w-full sm:w-auto ${hiddenOnMobile ? "hidden sm:block" : ""}`}>
             <button
               onClick={() => setOpenId(isOpen ? null : lang.id)}
               className={`flex min-h-[3rem] w-full items-center gap-2.5 rounded-xl border px-4 py-2.5 text-left backdrop-blur-md transition-all duration-200 active:scale-[0.98] sm:w-auto sm:hover:scale-[1.02] ${
@@ -146,6 +152,17 @@ export default function PlayerLanguageSelector({
           </div>
         );
       })}
+
+      {!expanded && languages.length > 1 && (
+        <button
+          type="button"
+          onClick={() => setExpanded(true)}
+          className="flex min-h-[2.75rem] w-full items-center justify-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs font-semibold text-white/60 transition-colors hover:bg-white/10 active:scale-[0.98] sm:hidden"
+        >
+          Ver más idiomas y servidores
+          <ChevronDown size={14} />
+        </button>
+      )}
     </div>
   );
 }

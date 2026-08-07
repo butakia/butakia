@@ -53,7 +53,7 @@ export default function Header() {
 
   return (
     <header
-      className={`fixed inset-x-0 top-0 z-50 flex items-center justify-between px-6 py-4 transition-colors duration-300 md:px-10 ${
+      className={`fixed inset-x-0 top-0 z-50 flex items-center justify-between px-3 py-4 transition-colors duration-300 sm:px-6 md:px-10 ${
         scrolled ? "bg-background/95 backdrop-blur-sm border-b border-border" : "bg-gradient-to-b from-black/80 to-transparent"
       }`}
     >

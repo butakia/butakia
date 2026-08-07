@@ -1,10 +1,22 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Plus, Trash2, Layers } from "lucide-react";
-import { Season } from "@/lib/types";
-import { addSeasonAction, addEpisodeAction, deleteEpisodeAction } from "@/lib/actions";
+import { Plus, Trash2, Layers, Pencil, X, Check } from "lucide-react";
+import { Season, Episode } from "@/lib/types";
+import { addSeasonAction, addEpisodeAction, deleteEpisodeAction, updateEpisodeAction } from "@/lib/actions";
 import ImageDropzone from "@/components/ImageDropzone";
+
+type EpisodeFormState = { number: string; title: string; playerLink: string; description: string; thumbnail: string };
+
+function episodeToForm(ep: Episode): EpisodeFormState {
+  return {
+    number: String(ep.number),
+    title: ep.title,
+    playerLink: ep.source?.value ?? "",
+    description: ep.description ?? "",
+    thumbnail: ep.thumbnail ?? "",
+  };
+}
 
 const inputCls =
   "rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/30 focus:border-accent focus:outline-none";
@@ -29,6 +41,25 @@ export default function SeasonsManager({
       else next.delete(seasonId);
       return next;
     });
+
+  // Editing an already-created episode — separate from episodeForms (which is the
+  // "add a new episode" form) so opening one doesn't clobber the other.
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editForms, setEditForms] = useState<Record<string, EpisodeFormState>>({});
+  const [uploadingEditThumb, setUploadingEditThumb] = useState<Set<string>>(new Set());
+  const setEditThumbUploading = (episodeId: string, uploading: boolean) =>
+    setUploadingEditThumb((prev) => {
+      const next = new Set(prev);
+      if (uploading) next.add(episodeId);
+      else next.delete(episodeId);
+      return next;
+    });
+  const setEditForm = (episodeId: string, patch: Partial<EpisodeFormState>) =>
+    setEditForms((prev) => ({ ...prev, [episodeId]: { ...prev[episodeId], ...patch } }));
+  const startEditing = (ep: Episode) => {
+    setEditForms((prev) => ({ ...prev, [ep.id]: episodeToForm(ep) }));
+    setEditingId(ep.id);
+  };
 
   const getEpisodeForm = (seasonId: string) =>
     episodeForms[seasonId] ?? { number: "1", title: "", playerLink: "", description: "", thumbnail: "" };
@@ -58,39 +89,121 @@ export default function SeasonsManager({
               </h3>
 
               <div className="flex flex-col gap-2">
-                {season.episodes.map((ep) => (
-                  <div
-                    key={ep.id}
-                    className="flex items-center justify-between gap-3 rounded-lg bg-white/5 px-3 py-2 text-sm"
-                  >
-                    <div className="flex min-w-0 items-center gap-2">
-                      {ep.thumbnail && (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={ep.thumbnail}
-                          alt=""
-                          className="h-8 w-14 shrink-0 rounded object-cover"
-                        />
-                      )}
-                      <div className="min-w-0">
-                        <span className="text-white/80">
-                          E{ep.number} — {ep.title}
-                        </span>
-                        {ep.description && (
-                          <p className="truncate text-xs text-white/40">{ep.description}</p>
+                {season.episodes.map((ep) => {
+                  const editing = editingId === ep.id;
+                  const editForm = editForms[ep.id] ?? episodeToForm(ep);
+                  if (editing) {
+                    return (
+                      <div key={ep.id} className="rounded-lg border border-accent/40 bg-white/5 p-3">
+                        <div className="flex flex-wrap items-end gap-2">
+                          <input
+                            value={editForm.number}
+                            onChange={(e) => setEditForm(ep.id, { number: e.target.value })}
+                            placeholder="N°"
+                            className={`${inputCls} w-16`}
+                          />
+                          <input
+                            value={editForm.title}
+                            onChange={(e) => setEditForm(ep.id, { title: e.target.value })}
+                            placeholder="Título del episodio"
+                            className={`${inputCls} flex-1 min-w-[140px]`}
+                          />
+                          <input
+                            value={editForm.playerLink}
+                            onChange={(e) => setEditForm(ep.id, { playerLink: e.target.value })}
+                            placeholder="Enlace del reproductor"
+                            className={`${inputCls} flex-1 min-w-[160px]`}
+                          />
+                          <input
+                            value={editForm.description}
+                            onChange={(e) => setEditForm(ep.id, { description: e.target.value })}
+                            placeholder="Descripción del episodio"
+                            className={`${inputCls} flex-1 min-w-[220px]`}
+                          />
+                        </div>
+                        <div className="mt-3 flex flex-wrap items-end gap-3">
+                          <ImageDropzone
+                            label="Miniatura del episodio"
+                            aspect="aspect-video"
+                            initialUrl={editForm.thumbnail || undefined}
+                            onChange={(url) => setEditForm(ep.id, { thumbnail: url || "" })}
+                            onUploadingChange={(uploading) => setEditThumbUploading(ep.id, uploading)}
+                          />
+                          <button
+                            type="button"
+                            disabled={isPending || !editForm.title || uploadingEditThumb.has(ep.id)}
+                            onClick={() =>
+                              startTransition(async () => {
+                                await updateEpisodeAction(ep.id, {
+                                  number: Number(editForm.number) || ep.number,
+                                  title: editForm.title,
+                                  playerLink: editForm.playerLink,
+                                  thumbnail: editForm.thumbnail,
+                                  description: editForm.description,
+                                });
+                                setEditingId(null);
+                              })
+                            }
+                            className="flex items-center gap-1.5 rounded-lg bg-accent px-3 py-2 text-xs font-semibold text-white disabled:opacity-40"
+                          >
+                            <Check size={14} />
+                            {uploadingEditThumb.has(ep.id) ? "Subiendo imagen..." : "Guardar cambios"}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setEditingId(null)}
+                            className="flex items-center gap-1.5 rounded-lg border border-white/15 px-3 py-2 text-xs font-semibold text-white/60 hover:bg-white/10"
+                          >
+                            <X size={14} />
+                            Cancelar
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  }
+                  return (
+                    <div
+                      key={ep.id}
+                      className="flex items-center justify-between gap-3 rounded-lg bg-white/5 px-3 py-2 text-sm"
+                    >
+                      <div className="flex min-w-0 items-center gap-2">
+                        {ep.thumbnail && (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={ep.thumbnail}
+                            alt=""
+                            className="h-8 w-14 shrink-0 rounded object-cover"
+                          />
                         )}
+                        <div className="min-w-0">
+                          <span className="text-white/80">
+                            E{ep.number} — {ep.title}
+                          </span>
+                          {ep.description && (
+                            <p className="truncate text-xs text-white/40">{ep.description}</p>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex shrink-0 items-center gap-3">
+                        <button
+                          onClick={() => startEditing(ep)}
+                          aria-label="Editar episodio"
+                          className="text-white/40 hover:text-accent"
+                        >
+                          <Pencil size={15} />
+                        </button>
+                        <button
+                          disabled={isPending}
+                          onClick={() => startTransition(() => deleteEpisodeAction(ep.id))}
+                          aria-label="Eliminar episodio"
+                          className="text-white/40 hover:text-red-400"
+                        >
+                          <Trash2 size={15} />
+                        </button>
                       </div>
                     </div>
-                    <button
-                      disabled={isPending}
-                      onClick={() => startTransition(() => deleteEpisodeAction(ep.id))}
-                      aria-label="Eliminar episodio"
-                      className="text-white/40 hover:text-red-400"
-                    >
-                      <Trash2 size={15} />
-                    </button>
-                  </div>
-                ))}
+                  );
+                })}
                 {season.episodes.length === 0 && (
                   <p className="text-xs text-white/40">Sin episodios todavía.</p>
                 )}

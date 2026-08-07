@@ -233,12 +233,20 @@ export async function addEpisodeAction(
 
 export async function updateEpisodeAction(
   episodeId: string,
-  data: { title?: string; description?: string; thumbnail?: string; playerLink?: string; duration?: string }
+  data: {
+    number?: number;
+    title?: string;
+    description?: string;
+    thumbnail?: string;
+    playerLink?: string;
+    duration?: string;
+  }
 ) {
   await requireAdmin();
   await prisma.episode.update({
     where: { id: episodeId },
     data: {
+      ...(data.number !== undefined ? { number: data.number } : {}),
       ...(data.title !== undefined ? { title: data.title } : {}),
       ...(data.description !== undefined ? { description: data.description || null } : {}),
       ...(data.thumbnail !== undefined ? { thumbnail: data.thumbnail || null } : {}),

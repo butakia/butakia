@@ -23,10 +23,11 @@ export default function UserMenu() {
     return (
       <Link
         href="/login"
-        className="flex items-center gap-2 rounded-full bg-accent px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-accent-hover"
+        aria-label="Iniciar sesión"
+        className="flex items-center gap-2 rounded-full bg-accent px-2.5 py-2 text-sm font-semibold text-white transition-colors hover:bg-accent-hover sm:px-4"
       >
-        <User size={16} />
-        Iniciar sesión
+        <User size={16} className="shrink-0" />
+        <span className="hidden sm:inline">Iniciar sesión</span>
       </Link>
     );
   }
