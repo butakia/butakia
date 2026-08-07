@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { Plus, Trash2, Layers } from "lucide-react";
 import { Season } from "@/lib/types";
 import { addSeasonAction, addEpisodeAction, deleteEpisodeAction } from "@/lib/actions";
+import ImageDropzone from "@/components/ImageDropzone";
 
 const inputCls =
   "rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/30 focus:border-accent focus:outline-none";
@@ -20,6 +21,14 @@ export default function SeasonsManager({
   const [episodeForms, setEpisodeForms] = useState<
     Record<string, { number: string; title: string; playerLink: string; description: string; thumbnail: string }>
   >({});
+  const [uploadingThumb, setUploadingThumb] = useState<Set<string>>(new Set());
+  const setThumbUploading = (seasonId: string, uploading: boolean) =>
+    setUploadingThumb((prev) => {
+      const next = new Set(prev);
+      if (uploading) next.add(seasonId);
+      else next.delete(seasonId);
+      return next;
+    });
 
   const getEpisodeForm = (seasonId: string) =>
     episodeForms[seasonId] ?? { number: "1", title: "", playerLink: "", description: "", thumbnail: "" };
@@ -107,20 +116,24 @@ export default function SeasonsManager({
                   className={`${inputCls} flex-1 min-w-[160px]`}
                 />
                 <input
-                  value={form.thumbnail}
-                  onChange={(e) => setEpisodeForm(season.id, { thumbnail: e.target.value })}
-                  placeholder="URL de miniatura (imagen)"
-                  className={`${inputCls} flex-1 min-w-[160px]`}
-                />
-                <input
                   value={form.description}
                   onChange={(e) => setEpisodeForm(season.id, { description: e.target.value })}
                   placeholder="Descripción del episodio"
                   className={`${inputCls} flex-1 min-w-[220px]`}
                 />
+              </div>
+              <div className="mt-3 flex flex-wrap items-end gap-3">
+                <ImageDropzone
+                  key={`${season.id}-${season.episodes.length}`}
+                  label="Miniatura del episodio"
+                  aspect="aspect-video"
+                  initialUrl={form.thumbnail || undefined}
+                  onChange={(url) => setEpisodeForm(season.id, { thumbnail: url || "" })}
+                  onUploadingChange={(uploading) => setThumbUploading(season.id, uploading)}
+                />
                 <button
                   type="button"
-                  disabled={isPending || !form.title}
+                  disabled={isPending || !form.title || uploadingThumb.has(season.id)}
                   onClick={() =>
                     startTransition(async () => {
                       await addEpisodeAction(season.id, {
@@ -142,7 +155,7 @@ export default function SeasonsManager({
                   className="flex items-center gap-1.5 rounded-lg bg-accent px-3 py-2 text-xs font-semibold text-white disabled:opacity-40"
                 >
                   <Plus size={14} />
-                  Agregar episodio
+                  {uploadingThumb.has(season.id) ? "Subiendo imagen..." : "Agregar episodio"}
                 </button>
               </div>
             </div>

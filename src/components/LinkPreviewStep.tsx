@@ -1,6 +1,7 @@
 "use client";
 
 import { CheckCircle2, RotateCcw, Tv2 } from "lucide-react";
+import { extractIframeSrc } from "@/lib/validateEmbedUrl";
 
 export default function LinkPreviewStep({
   playerLink,
@@ -23,7 +24,7 @@ export default function LinkPreviewStep({
       </p>
       <div className="aspect-video w-full overflow-hidden rounded-lg border border-white/10 bg-black">
         <iframe
-          src={playerLink}
+          src={extractIframeSrc(playerLink) ?? playerLink}
           className="h-full w-full"
           allowFullScreen
           sandbox="allow-scripts allow-same-origin allow-presentation"

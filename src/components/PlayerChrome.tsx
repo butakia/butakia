@@ -14,6 +14,7 @@ import {
   Clapperboard,
 } from "lucide-react";
 import { Title } from "@/lib/types";
+import { extractIframeSrc } from "@/lib/validateEmbedUrl";
 
 function formatTime(seconds: number): string {
   if (!Number.isFinite(seconds)) return "0:00";
@@ -170,7 +171,7 @@ export default function PlayerChrome({
       {isIframe && (
         <iframe
           key={source!.value}
-          src={source!.value}
+          src={extractIframeSrc(source!.value) ?? source!.value}
           className="h-full w-full bg-black"
           style={{ colorScheme: "dark" }}
           allow="autoplay; fullscreen; picture-in-picture"

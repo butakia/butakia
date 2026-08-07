@@ -10,8 +10,20 @@ import { PLAYBACK_LANGUAGES } from "./playbackLanguages";
 import { computeBadgeTier, BADGE_TIER_LABEL } from "./badges";
 import { parseDurationToSeconds } from "./duration";
 import { checkRateLimit } from "./rate-limit";
+import { extractIframeSrc } from "./validateEmbedUrl";
 
 import { slugify } from "./slugify";
+
+// Hosts like the one behind "hgcloud.to/xxxx" links serve a full share/download
+// page at that URL — iframing it embeds the whole page (download buttons, ads,
+// forum code, etc.), not just the player. Their own "Embed Code" tab gives the
+// actual `<iframe src="...">` snippet for just the video; this pulls the real
+// src out of that snippet if one was pasted, so both a plain URL and a full
+// embed snippet work.
+function normalizePlayerLink(raw: string): string {
+  const extracted = extractIframeSrc(raw);
+  return (extracted ?? raw).trim();
+}
 
 export async function requireAdmin() {
   const user = await getCurrentUser();
@@ -49,7 +61,7 @@ function buildPlaybackFromEntries(playbackEntriesJson: string | null | undefined
     list.push({
       id: `${slugify(e.serverName || "servidor")}-${list.length}`,
       name: e.serverName?.trim() || "Servidor",
-      source: { kind: "iframe", value: e.playerLink.trim() },
+      source: { kind: "iframe", value: normalizePlayerLink(e.playerLink) },
     });
     grouped.set(e.languageId, list);
   }
@@ -123,7 +135,7 @@ export async function createTitleAction(input: TitleFormInput) {
       badges: JSON.stringify(input.badges),
       customTags: JSON.stringify(input.customTags ?? []),
       sourceKind: input.playerLink ? "iframe" : null,
-      sourceValue: input.playerLink || null,
+      sourceValue: input.playerLink ? normalizePlayerLink(input.playerLink) : null,
       addedAt: new Date().toISOString().slice(0, 10),
       featured: input.featured ?? false,
       featuredOrder: input.featuredOrder ?? 0,
@@ -171,7 +183,7 @@ export async function updateTitleAction(slug: string, input: TitleFormInput) {
       ...(input.poster ? { poster: input.poster } : {}),
       ...(input.backdrop ? { backdrop: input.backdrop } : {}),
       ...(input.playerLink
-        ? { sourceKind: "iframe", sourceValue: input.playerLink }
+        ? { sourceKind: "iframe", sourceValue: normalizePlayerLink(input.playerLink) }
         : {}),
     },
   });
@@ -213,7 +225,7 @@ export async function addEpisodeAction(
       duration: data.duration || null,
       thumbnail: data.thumbnail || null,
       sourceKind: data.playerLink ? "iframe" : null,
-      sourceValue: data.playerLink || null,
+      sourceValue: data.playerLink ? normalizePlayerLink(data.playerLink) : null,
     },
   });
   revalidateCatalog();
@@ -232,7 +244,10 @@ export async function updateEpisodeAction(
       ...(data.thumbnail !== undefined ? { thumbnail: data.thumbnail || null } : {}),
       ...(data.duration !== undefined ? { duration: data.duration || null } : {}),
       ...(data.playerLink !== undefined
-        ? { sourceKind: data.playerLink ? "iframe" : null, sourceValue: data.playerLink || null }
+        ? {
+            sourceKind: data.playerLink ? "iframe" : null,
+            sourceValue: data.playerLink ? normalizePlayerLink(data.playerLink) : null,
+          }
         : {}),
     },
   });
@@ -400,7 +415,7 @@ export async function submitPendingAction(input: SubmissionInput): Promise<{ id:
     data: {
       title: input.title,
       type: input.type,
-      playerLink: input.playerLink,
+      playerLink: normalizePlayerLink(input.playerLink),
       description: input.description || null,
       posterUrl: input.posterUrl || null,
       backdropUrl: input.backdropUrl || null,
@@ -725,7 +740,7 @@ export async function approveEditSuggestionAction(id: string) {
       ...(changes.cast !== undefined ? { cast: JSON.stringify(changes.cast) } : {}),
       ...(changes.genres !== undefined ? { genres: JSON.stringify(changes.genres) } : {}),
       ...(changes.playerLink !== undefined
-        ? { sourceKind: "iframe", sourceValue: changes.playerLink }
+        ? { sourceKind: "iframe", sourceValue: normalizePlayerLink(changes.playerLink) }
         : {}),
       ...(changes.posterUrl !== undefined ? { poster: changes.posterUrl } : {}),
       ...(changes.backdropUrl !== undefined ? { backdrop: changes.backdropUrl } : {}),
