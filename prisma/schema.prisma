@@ -1,0 +1,655 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Title {
+  id            String   @id @default(cuid())
+  slug          String   @unique
+  title         String
+  originalTitle String?
+  type          String // "movie" | "series"
+  year          Int
+  duration      String?
+  rating        Float    @default(0)
+  ageRating     String?
+  country       String?
+  language      String?
+  genres        String   @default("[]") // JSON string array
+  tags          String   @default("[]") // JSON string array
+  synopsis      String   @default("")
+  poster        String
+  backdrop      String
+  badges        String   @default("[]") // JSON string array
+  customTags    String   @default("[]") // JSON string array — admin-defined Tag labels
+  director      String?
+  cast          String   @default("[]") // JSON string array
+  franchise     String?
+  hasTrailer    Boolean  @default(false)
+  trailerUrl    String?
+  galleryCount  Int?
+  views         Int      @default(0)
+  addedAt       String?
+  relatedSlugs  String   @default("[]") // JSON string array
+  sourceKind    String?
+  sourceValue   String?
+  playback      String? // JSON serialized PlaybackLanguage[]
+  trivia        String   @default("[]") // JSON string array of fun facts
+  status        String   @default("published") // "published" | "draft"
+  featured      Boolean  @default(false)
+  featuredOrder Int      @default(0)
+  uploaderName  String?
+  seoTitle      String?
+  seoDescription String?
+  seoKeywords   String   @default("[]") // JSON string array
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  seasons       Season[]
+  reports       Report[]
+  editSuggestions EditSuggestion[]
+  favorites     Favorite[]
+  votes         Vote[]
+  reactions     Reaction[]
+  comments      Comment[]
+  watchHistory  WatchHistory[]
+}
+
+model Favorite {
+  id        String   @id @default(cuid())
+  userId    String
+  profileId String?
+  profile   Profile? @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  titleId   String
+  title     Title    @relation(fields: [titleId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([profileId, titleId])
+}
+
+model Vote {
+  id        String   @id @default(cuid())
+  userId    String
+  profileId String?
+  profile   Profile? @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  titleId   String
+  title     Title    @relation(fields: [titleId], references: [id], onDelete: Cascade)
+  value     String // "like" | "dislike"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([profileId, titleId])
+}
+
+model Reaction {
+  id        String   @id @default(cuid())
+  userId    String
+  profileId String?
+  profile   Profile? @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  titleId   String
+  title     Title    @relation(fields: [titleId], references: [id], onDelete: Cascade)
+  emoji     String // "like" | "heart" | "cry" | "poop"
+  createdAt DateTime @default(now())
+
+  @@unique([profileId, titleId])
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  titleId   String
+  title     Title    @relation(fields: [titleId], references: [id], onDelete: Cascade)
+  userId    String
+  userName  String
+  message   String
+  createdAt DateTime @default(now())
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  message   String
+  link      String?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model WatchHistory {
+  id        String   @id @default(cuid())
+  userId    String
+  profileId String?
+  profile   Profile? @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  titleId   String
+  title     Title    @relation(fields: [titleId], references: [id], onDelete: Cascade)
+  viewedAt  DateTime @default(now())
+  progressPercent Int @default(0)
+
+  @@unique([profileId, titleId])
+}
+
+model Profile {
+  id           String         @id @default(cuid())
+  userId       String
+  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name         String
+  avatarSeed   String
+  avatarUrl    String?
+  pinHash      String?
+  isKids       Boolean        @default(false)
+  createdAt    DateTime       @default(now())
+  favorites    Favorite[]
+  votes        Vote[]
+  reactions    Reaction[]
+  watchHistory WatchHistory[]
+  bookFavorites    BookFavorite[]
+  readingProgress  ReadingProgress[]
+}
+
+model EditSuggestion {
+  id          String   @id @default(cuid())
+  titleId     String
+  title       Title    @relation(fields: [titleId], references: [id], onDelete: Cascade)
+  changes     String // JSON string of proposed partial field changes
+  submittedBy String
+  status      String   @default("pending") // "pending" | "approved" | "rejected"
+  createdAt   DateTime @default(now())
+}
+
+model Report {
+  id        String   @id @default(cuid())
+  titleId   String
+  title     Title    @relation(fields: [titleId], references: [id], onDelete: Cascade)
+  message   String?
+  status    String   @default("open") // "open" | "resolved"
+  createdAt DateTime @default(now())
+}
+
+model Season {
+  id       String    @id @default(cuid())
+  titleId  String
+  title    Title     @relation(fields: [titleId], references: [id], onDelete: Cascade)
+  number   Int
+  name     String?
+  episodes Episode[]
+}
+
+model Episode {
+  id          String  @id @default(cuid())
+  seasonId    String
+  season      Season  @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  number      Int
+  title       String
+  description String?
+  duration    String?
+  thumbnail   String?
+  sourceKind  String?
+  sourceValue String?
+}
+
+model BlogPost {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  excerpt     String   @default("")
+  content     String   @default("") // HTML del editor enriquecido
+  coverImage  String?
+  category    String   @default("noticia") // "noticia" | "actualizacion" | "articulo"
+  authorName  String   @default("Butakia")
+  status      String   @default("draft") // "draft" | "published"
+  seoTitle       String?
+  seoDescription String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  publishedAt DateTime?
+}
+
+model Contributor {
+  id            String    @id @default(cuid())
+  name          String
+  avatarSeed    String
+  avatarUrl     String?
+  uploads       Int       @default(0)
+  bookUploads   Int       @default(0)
+  joinedAt      String
+  badge         String? // "gold" | "silver" | "bronze"
+  bio           String?
+  country       String?
+  socialLink    String?
+  nameChangedAt DateTime?
+  userId        String?   @unique
+  user          User?     @relation(fields: [userId], references: [id])
+  followers     Follow[]
+  playlists     Playlist[]
+  books         Book[]
+}
+
+model Playlist {
+  id            String      @id @default(cuid())
+  contributorId String
+  contributor   Contributor @relation(fields: [contributorId], references: [id], onDelete: Cascade)
+  name          String
+  description   String?
+  titleIds      String      @default("[]") // JSON string array of Title ids, order preserved
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
+model Franchise {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  logoUrl   String?
+  createdAt DateTime @default(now())
+}
+
+model Follow {
+  id            String      @id @default(cuid())
+  userId        String
+  contributorId String
+  contributor   Contributor @relation(fields: [contributorId], references: [id], onDelete: Cascade)
+  createdAt     DateTime    @default(now())
+
+  @@unique([userId, contributorId])
+}
+
+model PendingSubmission {
+  id               String   @id @default(cuid())
+  title            String
+  type             String // "movie" | "series"
+  playerLink       String
+  description      String?
+  posterUrl        String?
+  backdropUrl      String?
+  seasonNumber     Int?
+  episodeNumber    Int?
+  episodeTitle     String?
+  director         String?
+  cast             String   @default("[]") // JSON string array
+  year             Int?
+  country          String?
+  language         String?
+  duration         String?
+  genres           String   @default("[]") // JSON string array
+  franchise        String?
+  previewConfirmed Boolean  @default(false)
+  playbackEntries  String   @default("[]") // JSON array of {id, languageId, serverName, playerLink}
+  submittedBy      String   @default("Anónimo")
+  submittedAt      DateTime @default(now())
+}
+
+model User {
+  id           String       @id @default(cuid())
+  email        String       @unique
+  passwordHash String?
+  googleId     String?      @unique
+  avatarUrl    String?
+  name         String
+  role         String       @default("user") // "user" | "admin"
+  adminLevel   String? // "full" | "partial" — only meaningful when role = "admin"
+  isPremium    Boolean      @default(false)
+  securityQuestion1    String?
+  securityAnswer1Hash  String?
+  securityQuestion2    String?
+  securityAnswer2Hash  String?
+  referralCode String?      @unique
+  referredById String?
+  referredBy   User?        @relation("Referrals", fields: [referredById], references: [id])
+  referrals    User[]       @relation("Referrals")
+  createdAt    DateTime     @default(now())
+  contributor  Contributor?
+  premiumRequests PremiumRequest[]
+  profiles     Profile[]
+}
+
+model PremiumRequest {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  method      String // "paypal" | "yape"
+  note        String?
+  status      String   @default("pending") // "pending" | "approved" | "rejected"
+  createdAt   DateTime @default(now())
+}
+
+model HomeSection {
+  id            String  @id @default(cuid())
+  title         String
+  type          String  @default("manual") // "manual" | "genre" | "newest" | "similar" | "franchise"
+  genre         String?
+  baseTitleSlug String?
+  franchise     String?
+  titleSlugs    String  @default("[]") // JSON string array, used when type = "manual"
+  order         Int     @default(0)
+  active        Boolean @default(true)
+}
+
+model ForumThread {
+  id        String       @id @default(cuid())
+  title     String
+  body      String
+  authorName String
+  authorId  String?
+  section   String       @default("movies") // "movies" | "books" — keeps the two communities' threads apart
+  category  String       @default("general") // movies: "general" | "ayuda" | "sugerencias" | "peliculas"; books: "general" | "recomendaciones" | "autores" | "ayuda-lectura" | "debate"
+  pinned    Boolean      @default(false)
+  createdAt DateTime     @default(now())
+  replies   ForumReply[]
+
+  @@index([section])
+}
+
+model ForumReply {
+  id        String      @id @default(cuid())
+  threadId  String
+  thread    ForumThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  body      String
+  authorName String
+  authorId  String?
+  createdAt DateTime    @default(now())
+}
+
+model SiteSettings {
+  id                   String  @id @default("singleton")
+  siteName             String  @default("Butakia")
+  paypalLink           String?
+  yapeNumber           String?
+  yapeQrUrl            String?
+  allowGuestPlayback   Boolean @default(true)
+  requireApproval      Boolean @default(true)
+  totalDonations       Float   @default(0)
+  donationSharePercent Float   @default(10)
+  uploadGoal           Int     @default(50)
+  thankYouMessage      String  @default("¡Gracias por tu aporte a la comunidad! Sigue subiendo contenido para desbloquear más insignias.")
+  premiumPriceMonthly  Float   @default(4.99)
+  premiumEnabled       Boolean @default(true)
+  profilesPremiumOnly  Boolean @default(false)
+  maxProfilesFree      Int     @default(4)
+  accentColor          String  @default("#e50914")
+  siteTagline          String  @default("")
+  librosTagline        String  @default("Libros")
+  librosHeroMessage    String  @default("")
+  adsEnabled           Boolean @default(true)
+  donationsEnabled     Boolean @default(true)
+  prerollEnabled       Boolean @default(true)
+  pdfUploadEnabled     Boolean @default(true)
+  fakeVisitorsEnabled  Boolean @default(false)
+  fakeVisitorsMin      Int     @default(20)
+  fakeVisitorsMax      Int     @default(50)
+
+  // --- Personalización del sitio (CMS) ---
+  logoUrl              String?
+  faviconUrl           String?
+  siteDescription      String  @default("Butakia es la plataforma colaborativa para ver películas y series online gratis, en HD y en español latino.")
+  secondaryColor       String  @default("#161616")
+  bannerUrl            String?
+  bannerLink           String?
+  bannerEnabled        Boolean @default(false)
+  socialFacebook       String?
+  socialInstagram      String?
+  socialTwitter        String?
+  socialYoutube        String?
+  socialTiktok         String?
+  socialWhatsapp       String?
+  footerText           String?
+  contactEmail         String?
+  contactPhone         String?
+}
+
+// Admin-defined labels ("NUEVO", "4K", "RECOMENDADO"...) that can be attached to
+// any Title or Book, instead of the old fixed ALL_BADGES list baked into the form.
+model Tag {
+  id        String   @id @default(cuid())
+  label     String   @unique
+  color     String   @default("#e50914")
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+}
+
+model SiteVisit {
+  id        String   @id @default(cuid())
+  path      String
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
+
+model AdSlot {
+  id         String   @id @default(cuid())
+  name       String
+  iframeCode String
+  placement  String // "popup" | "square" | "under_row" | "player" | "libros_home" | "titulo_detalle" | "libro_detalle" | "explorar"
+  sizePreset String   @default("responsive") // "responsive" | "300x250" | "728x90" | "160x600" | "320x50"
+  active     Boolean  @default(true)
+  order      Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+// --- Butakia Libros ---
+
+model Book {
+  id                String   @id @default(cuid())
+  slug              String   @unique
+  title             String
+  subtitle          String?
+  authorName        String
+  authorId          String?
+  author            Contributor? @relation(fields: [authorId], references: [id])
+  literaryAuthorId  String?
+  literaryAuthor    LiteraryAuthor? @relation(fields: [literaryAuthorId], references: [id])
+  showUploader      Boolean  @default(true)
+  publisher         String?
+  year              Int?
+  language          String?
+  isbn              String?
+  synopsis          String   @default("")
+  cover             String
+  genres            String   @default("[]") // JSON string array
+  tags              String   @default("[]") // JSON string array
+  categories        String   @default("[]") // JSON string array
+  badges            String   @default("[]") // JSON string array — admin-defined Tag labels
+  contentType       String   @default("text") // "pdf" | "text" | "richtext"
+  sourceKind        String   @default("native") // "pdf_upload" | "pasted_text" | "editor"
+  pdfUrl            String?
+  pageCount         Int?
+  wordCount         Int?
+  status            String   @default("draft") // "draft" | "published" | "unpublished" | "rejected"
+  isFree            Boolean  @default(true)
+  featured          Boolean  @default(false)
+  featuredOrder     Int      @default(0)
+  views             Int      @default(0)
+  readCount         Int      @default(0)
+  rating            Float    @default(0)
+  uploaderId        String
+  uploaderName      String?
+  seoTitle          String?
+  seoDescription    String?
+  seoKeywords       String   @default("[]") // JSON string array
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  chapters          BookChapter[]
+  favorites         BookFavorite[]
+  comments          BookComment[]
+  reports           BookReport[]
+  readingProgress   ReadingProgress[]
+  rightsDeclaration RightsDeclaration?
+  saleInfo          BookSaleInfo?
+  orders            BookOrder[]
+  highlights        BookHighlight[]
+}
+
+model BookChapter {
+  id        String   @id @default(cuid())
+  bookId    String
+  book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  order     Int
+  title     String?
+  content   String   @default("") // plain text or HTML
+  pageStart Int?
+  pageEnd   Int?
+  createdAt DateTime @default(now())
+
+  @@index([bookId, order])
+}
+
+model RightsDeclaration {
+  id            String   @id @default(cuid())
+  bookId        String   @unique
+  book          Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  basis         String // "owner" | "public_domain" | "authorized"
+  userId        String
+  ipAddress     String?
+  policyVersion String   @default("v1")
+  acceptedAt    DateTime @default(now())
+}
+
+model BookFavorite {
+  id        String   @id @default(cuid())
+  userId    String
+  profileId String?
+  profile   Profile? @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  bookId    String
+  book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([profileId, bookId])
+}
+
+model BookComment {
+  id        String   @id @default(cuid())
+  bookId    String
+  book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  userId    String
+  userName  String
+  message   String
+  createdAt DateTime @default(now())
+}
+
+model ReadingProgress {
+  id         String   @id @default(cuid())
+  userId     String
+  profileId  String?
+  profile    Profile? @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  bookId     String
+  book       Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  chapterId  String?
+  page       Int      @default(0)
+  percent    Int      @default(0)
+  lastReadAt DateTime @default(now())
+
+  @@unique([profileId, bookId])
+}
+
+model BookReport {
+  id        String   @id @default(cuid())
+  bookId    String
+  book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  reason    String // "not_author" | "copyright" | "illegal" | "spam" | "duplicate" | "offensive"
+  message   String?
+  status    String   @default("open") // "open" | "resolved"
+  createdAt DateTime @default(now())
+}
+
+model PendingBookSubmission {
+  id          String   @id @default(cuid())
+  title       String
+  authorName  String
+  synopsis    String?
+  coverUrl    String?
+  contentType String   @default("text")
+  payload     String   @default("{}") // JSON: raw text / pdf url / richtext json
+  submittedBy String
+  submittedAt DateTime @default(now())
+}
+
+model ReaderPreference {
+  id           String  @id @default(cuid())
+  userId       String  @unique
+  mode         String  @default("flip") // "flip" | "scroll"
+  theme        String  @default("dark") // "dark" | "sepia" | "light"
+  fontSize     Int     @default(18)
+  lineHeight   Float   @default(1.5)
+  fontFamily   String  @default("serif")
+  textWidth    String  @default("normal") // "narrow" | "normal" | "wide"
+  textAlign    String  @default("left")   // "left" | "justify"
+  soundEnabled Boolean @default(false)
+}
+
+model BookCollection {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  bookIds   String   @default("[]") // JSON string array of Book ids, order preserved
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model BookSaleInfo {
+  id                String   @id @default(cuid())
+  bookId            String   @unique
+  book              Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  priceUsd          Float?
+  commercialDesc    String?
+  discountAllowed   Boolean  @default(false)
+  promotionAllowed  Boolean  @default(false)
+  phoneNumber       String?
+  validationStatus  String   @default("pending") // "pending" | "in_review" | "info_requested" | "approved" | "rejected" | "suspended"
+  adminObservations String   @default("[]") // JSON string array of {id, note, adminName, createdAt}
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model BookOrder {
+  id        String   @id @default(cuid())
+  bookId    String
+  book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  buyerId   String
+  priceUsd  Float
+  status    String   @default("pending") // "pending" | "completed" | "refunded"
+  createdAt DateTime @default(now())
+}
+
+model BookEntitlement {
+  id        String   @id @default(cuid())
+  userId    String
+  bookId    String
+  grantedAt DateTime @default(now())
+
+  @@unique([userId, bookId])
+}
+
+// A literary author (e.g. Kafka) — distinct from Contributor, which represents the
+// registered user who uploaded a book. Auto-created by name the first time a book
+// credits an author not yet on file; only admins enrich it with photo/bio afterward.
+model LiteraryAuthor {
+  id         String   @id @default(cuid())
+  slug       String   @unique
+  name       String
+  photoUrl   String?
+  bio        String?
+  trajectory String   @default("") // longer career/background text, editable by the claiming user
+  userId     String?  @unique // registered user who claimed this author profile, if any
+  verified   Boolean  @default(false) // admin-approved "verified author" badge
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  books      Book[]
+}
+
+model BookHighlight {
+  id         String   @id @default(cuid())
+  userId     String
+  bookId     String
+  book       Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  chapterId  String
+  startOffset Int
+  endOffset  Int
+  text       String
+  color      String   @default("#fde047")
+  note       String?
+  createdAt  DateTime @default(now())
+}

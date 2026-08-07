@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "butakia-dev",
+      "runtimeExecutable": "C:\\Users\\Omar\\Desktop\\BUTAKIA\\.claude\\run-dev.bat",
+      "runtimeArgs": [],
+      "port": 3000
+    },
+    {
+      "name": "butakia-prod",
+      "runtimeExecutable": "C:\\Users\\Omar\\Desktop\\BUTAKIA\\.claude\\run-prod.bat",
+      "runtimeArgs": [],
+      "port": 3000
+    }
+  ]
+}
