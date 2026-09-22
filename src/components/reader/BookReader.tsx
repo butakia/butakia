@@ -49,7 +49,7 @@ const FALLBACK_SIZE = { width: 340, height: 480 };
 // a real book page is noticeably taller than it is wide. Without this, wide desktop
 // viewports (which give the flip wrapper a lot of horizontal room but a height capped
 // by the surrounding controls) end up measuring a near-square or landscape box instead.
-const TEXT_PAGE_ASPECT = 0.72;
+const TEXT_PAGE_ASPECT = 0.76;
 
 const PAPER_SHADOW: Record<ReaderPrefs["theme"], string> = {
   dark: "inset 0 0 0 1px rgba(255,255,255,0.06), 0 8px 24px -6px rgba(0,0,0,0.6)",
@@ -878,7 +878,7 @@ export default function BookReader({
       // mode, which needs the opposite (natural, unbounded height so the page can
       // flow normally instead of this box's content overflowing on top of whatever
       // comes after it, like the comments section).
-      style={isFullscreen ? undefined : { height: "min(88dvh, 900px)" }}
+      style={isFullscreen ? undefined : { height: "min(94dvh, 980px)" }}
     >
       {notesPanel}
       {isFullscreen ? (
@@ -977,7 +977,7 @@ export default function BookReader({
           // them, which read as "swiping doesn't work" in fullscreen specifically.
           // Widening the cap there closes most of that gap.
           maxWidth: isFullscreen ? Math.min(TEXT_WIDTH_MAX[prefs.textWidth] * 1.5, 900) : TEXT_WIDTH_MAX[prefs.textWidth],
-          maxHeight: isFullscreen ? "94vh" : "820px",
+          maxHeight: isFullscreen ? "94vh" : "920px",
           touchAction: highlightMode ? "pan-y" : "none",
         }}
       >
