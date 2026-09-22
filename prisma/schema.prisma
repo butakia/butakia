@@ -354,7 +354,7 @@ model ReaderPreference {
   id           String  @id @default(cuid())
   userId       String  @unique
   mode         String  @default("flip") // "flip" | "scroll"
-  theme        String  @default("dark") // "dark" | "sepia" | "light"
+  theme        String  @default("sepia") // "dark" | "sepia" | "light"
   fontSize     Int     @default(18)
   lineHeight   Float   @default(1.5)
   fontFamily   String  @default("serif")

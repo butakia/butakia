@@ -45,6 +45,12 @@ const TEXT_WIDTH_MAX: Record<ReaderPrefs["textWidth"], number> = {
 // superseded within one frame on the client.
 const FALLBACK_SIZE = { width: 340, height: 480 };
 
+// Target width/height ratio for a text page when there's no PDF page shape to match —
+// a real book page is noticeably taller than it is wide. Without this, wide desktop
+// viewports (which give the flip wrapper a lot of horizontal room but a height capped
+// by the surrounding controls) end up measuring a near-square or landscape box instead.
+const TEXT_PAGE_ASPECT = 0.72;
+
 const PAPER_SHADOW: Record<ReaderPrefs["theme"], string> = {
   dark: "inset 0 0 0 1px rgba(255,255,255,0.06), 0 8px 24px -6px rgba(0,0,0,0.6)",
   sepia: "inset 0 0 0 1px rgba(58,47,34,0.15), 0 8px 24px -6px rgba(58,47,34,0.35)",
@@ -53,7 +59,7 @@ const PAPER_SHADOW: Record<ReaderPrefs["theme"], string> = {
 
 const DEFAULT_PREFS: ReaderPrefs = {
   mode: "flip",
-  theme: "dark",
+  theme: "sepia",
   fontSize: 18,
   lineHeight: 1.5,
   fontFamily: "serif",
@@ -375,15 +381,14 @@ export default function BookReader({
       if (rect.width <= 0 || rect.height <= 0) return;
       let width = rect.width;
       let height = rect.height;
-      // Contain-fit the available box to the PDF's real page proportions instead of
-      // using it as-is — otherwise the page renders squashed into whatever generic
-      // shape the text-reading box happens to be.
-      if (isPdf && pdfPageAspect) {
-        if (width / height > pdfPageAspect) {
-          width = height * pdfPageAspect;
-        } else {
-          height = width / pdfPageAspect;
-        }
+      // Contain-fit the available box to the page's real proportions instead of using
+      // it as-is — otherwise the page renders squashed into whatever generic shape the
+      // text-reading box happens to be (e.g. near-square on wide desktop viewports).
+      const targetAspect = isPdf && pdfPageAspect ? pdfPageAspect : TEXT_PAGE_ASPECT;
+      if (width / height > targetAspect) {
+        width = height * targetAspect;
+      } else {
+        height = width / targetAspect;
       }
       width = Math.round(width);
       height = Math.round(height);
