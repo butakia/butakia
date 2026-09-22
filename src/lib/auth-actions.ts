@@ -64,7 +64,6 @@ export async function registerAction(
     data: {
       name,
       avatarSeed: user.id,
-      uploads: 0,
       joinedAt: new Date().toISOString().slice(0, 10),
       userId: user.id,
     },
@@ -104,55 +103,6 @@ export async function logoutAction() {
   redirect("/");
 }
 
-export interface QuickRegisterInput {
-  name: string;
-  password: string;
-  pendingSubmissionId?: string;
-  captchaAnswer: string;
-  captchaToken: string;
-}
-
-export async function quickRegisterAction(
-  input: QuickRegisterInput
-): Promise<{ error?: string }> {
-  if (!(await checkRateLimit("register", 6, 60 * 60_000))) {
-    return { error: "Demasiados intentos de registro. Intenta de nuevo más tarde." };
-  }
-  const name = input.name.trim();
-  if (name.length < 2) return { error: "El nombre debe tener al menos 2 caracteres." };
-  if (input.password.length < 6) return { error: "La contraseña debe tener al menos 6 caracteres." };
-  if (!verifyCaptcha(input.captchaToken, input.captchaAnswer)) {
-    return { error: "El código de seguridad no es correcto. Intenta de nuevo." };
-  }
-
-  const email = `usuario-${Date.now()}-${Math.random().toString(36).slice(2, 7)}@butakia.local`;
-  const passwordHash = await bcrypt.hash(input.password, 10);
-  const referralCode = await generateUniqueReferralCode();
-
-  const user = await prisma.user.create({
-    data: { name, email, passwordHash, role: "user", referralCode },
-  });
-
-  await prisma.contributor.create({
-    data: {
-      name,
-      avatarSeed: user.id,
-      uploads: 0,
-      joinedAt: new Date().toISOString().slice(0, 10),
-      userId: user.id,
-    },
-  });
-
-  if (input.pendingSubmissionId) {
-    await prisma.pendingSubmission.updateMany({
-      where: { id: input.pendingSubmissionId },
-      data: { submittedBy: name },
-    });
-  }
-
-  await createSession(user.id, "user");
-  return {};
-}
 
 // --- Preguntas de seguridad (recuperación de contraseña sin correo) ---
 

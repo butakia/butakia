@@ -59,7 +59,6 @@ export async function GET(request: NextRequest) {
           name: user.name,
           avatarSeed: user.id,
           avatarUrl: profile.picture ?? null,
-          uploads: 0,
           joinedAt: new Date().toISOString().slice(0, 10),
           userId: user.id,
         },
