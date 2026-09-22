@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight, ArrowLeft, Highlighter, X, List as ListIcon, Maximize, Minimize } from "lucide-react";
+import { ChevronLeft, ChevronRight, ArrowLeft, Highlighter, X, List as ListIcon, Maximize, Minimize, Bookmark, BookmarkCheck } from "lucide-react";
 import HTMLFlipBook from "react-pageflip";
 import { Book, BookChapter, SiteSettings } from "@/lib/types";
 import Logo from "../Logo";
@@ -13,6 +13,7 @@ import PdfPageRenderer, { getPdfPageAspectRatio } from "./PdfPageRenderer";
 import HighlightableText from "./HighlightableText";
 import NotesPanel from "./NotesPanel";
 import BookFinishedScreen from "./BookFinishedScreen";
+import BookmarkRibbon from "./BookmarkRibbon";
 import CelebrationModal from "./CelebrationModal";
 import ShareRow from "./ShareRow";
 import DonateButtons from "../DonateButtons";
@@ -897,7 +898,41 @@ export default function BookReader({
           <Logo iconOnly className="opacity-80" />
           {highlightControls || <div className="w-9" aria-hidden />}
         </div>
-      ) : (
+      ) : null}
+      {isFullscreen && (
+        <div className="absolute inset-x-0 bottom-5 z-30 flex items-center justify-center">
+          <div className="flex items-center gap-1 rounded-full bg-black/60 px-2 py-1.5 text-white backdrop-blur-sm">
+            <button
+              type="button"
+              onClick={() => updatePrefs({ fontSize: Math.max(12, prefs.fontSize - 1) })}
+              aria-label="Reducir tamaño de letra"
+              className="flex h-8 w-8 items-center justify-center rounded-full font-bold hover:bg-white/10"
+            >
+              A-
+            </button>
+            <span className="w-6 text-center text-xs">{prefs.fontSize}</span>
+            <button
+              type="button"
+              onClick={() => updatePrefs({ fontSize: Math.min(28, prefs.fontSize + 1) })}
+              aria-label="Aumentar tamaño de letra"
+              className="flex h-8 w-8 items-center justify-center rounded-full font-bold hover:bg-white/10"
+            >
+              A+
+            </button>
+            <span className="mx-1 h-5 w-px bg-white/15" />
+            <button
+              type="button"
+              onClick={saveBookmarkNow}
+              aria-label="Guardar progreso de lectura en esta página"
+              title="Guardar progreso"
+              className={`flex h-8 w-8 items-center justify-center rounded-full ${bookmarkSaved ? "bg-accent text-white" : "hover:bg-white/10"}`}
+            >
+              {bookmarkSaved ? <BookmarkCheck size={15} /> : <Bookmark size={15} />}
+            </button>
+          </div>
+        </div>
+      )}
+      {!isFullscreen && (
         <>
           <div className="w-full shrink-0">
             <ReaderControls
@@ -984,6 +1019,7 @@ export default function BookReader({
           touchAction: highlightMode ? "pan-y" : "none",
         }}
       >
+        <BookmarkRibbon show={bookmarkSaved} />
         {mounted && containerSize && (
           <HTMLFlipBook
             // react-pageflip only reads style/size props once, on mount — it never

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { motion } from "framer-motion";
 import { PartyPopper, Check, Plus, RotateCcw, Highlighter, X } from "lucide-react";
 import { Book } from "@/lib/types";
 import { toggleBookFavoriteAction } from "@/lib/books-actions";
@@ -40,9 +41,14 @@ export default function BookFinishedScreen({
   };
 
   return (
-    <div
+    <motion.div
+      // Reads as the book settling shut on the final page — a quick scale/tilt
+      // from a thin closed sliver into the full finished screen.
+      initial={{ scaleX: 0.05, rotateY: -35, opacity: 0.4 }}
+      animate={{ scaleX: 1, rotateY: 0, opacity: 1 }}
+      transition={{ duration: 0.55, ease: "easeOut" }}
+      style={{ background: theme.bg, color: theme.text, transformOrigin: "left center" }}
       className="relative flex h-full w-full flex-col items-center justify-center gap-4 overflow-y-auto p-6 text-center"
-      style={{ background: theme.bg, color: theme.text }}
     >
       <PartyPopper size={40} className="text-accent" />
       <div>
@@ -114,6 +120,6 @@ export default function BookFinishedScreen({
           </div>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }
