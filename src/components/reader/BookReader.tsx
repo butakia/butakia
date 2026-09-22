@@ -284,6 +284,12 @@ export default function BookReader({
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const flipWrapperRef = useRef<HTMLDivElement>(null);
+  // The row that actually has real, non-circular size (it's a flex-1 child of
+  // containerRef, filling whatever height the toolbar rows above leave over) —
+  // measuring THIS instead of flipWrapperRef avoids a chicken-and-egg problem:
+  // flipWrapperRef only gets a size once its content (the flip book) renders,
+  // but the flip book only renders once flipWrapperRef has a size.
+  const flipRowRef = useRef<HTMLDivElement>(null);
   // The real, on-screen size of the page box — measured directly instead of assumed, since
   // react-pageflip stretches to fit whatever the parent allows and that real size varies a
   // lot device to device. Pagination and the flip book's own width/height props are both
@@ -307,6 +313,10 @@ export default function BookReader({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isPdf, book.pdfUrl]);
+  // Single source of truth for the page's target ratio, used both by the CSS
+  // `aspect-ratio` on the wrapper (so the wrapper's own box is already correctly
+  // shaped, with no leftover dead space) and by the ResizeObserver below.
+  const targetAspect = isPdf && pdfPageAspect ? pdfPageAspect : TEXT_PAGE_ASPECT;
   // Highlighting needs native touch text-selection, which "touch-action: none" (below)
   // deliberately blocks so the page-turn gesture doesn't fight the browser for the touch.
   // This mode temporarily hands touch back to the browser so long-press-to-select works,
@@ -378,17 +388,19 @@ export default function BookReader({
   // so it doesn't force constant flip-book remounts while reading.
   const lastMeasuredSizeRef = useRef<{ width: number; height: number } | null>(null);
   useEffect(() => {
-    const el = flipWrapperRef.current;
+    const el = flipRowRef.current;
     if (!el) return;
     const update = () => {
       const rect = el.getBoundingClientRect();
       if (rect.width <= 0 || rect.height <= 0) return;
+      // Contain-fit the row's real available box to the page's target proportions
+      // — this is the actual "largest box that fits both the width and height
+      // limits while keeping the ratio" computation (equivalent to object-fit:
+      // contain), done in JS against an element that already has a real size
+      // regardless of the flip book's own content, instead of relying on CSS
+      // aspect-ratio interacting unpredictably with the surrounding flex layout.
       let width = rect.width;
       let height = rect.height;
-      // Contain-fit the available box to the page's real proportions instead of using
-      // it as-is — otherwise the page renders squashed into whatever generic shape the
-      // text-reading box happens to be (e.g. near-square on wide desktop viewports).
-      const targetAspect = isPdf && pdfPageAspect ? pdfPageAspect : TEXT_PAGE_ASPECT;
       if (width / height > targetAspect) {
         width = height * targetAspect;
       } else {
@@ -979,7 +991,7 @@ export default function BookReader({
         </>
       )}
 
-      <div className="relative flex w-full min-h-0 flex-1 items-stretch justify-center">
+      <div ref={flipRowRef} className="relative flex w-full min-h-0 flex-1 items-stretch justify-center">
         {/* Desktop-only click-to-turn arrows — the swipe gesture stays the primary way to
             turn pages on touch devices, but a mouse user on a big screen has no
             equivalent unless they discover the edge-drag zones, so an explicit arrow
@@ -1006,16 +1018,16 @@ export default function BookReader({
 
       <div
         ref={flipWrapperRef}
-        className="relative mx-auto flex w-full min-h-0 flex-1 items-center justify-center overflow-hidden"
+        className="relative mx-auto flex items-center justify-center overflow-hidden"
         style={{
-          // In fullscreen the surrounding screen is much bigger than the capped reading
-          // width, so a user's natural swipe (anywhere across that big black canvas)
-          // often landed outside the book element entirely — our gesture listeners are
-          // attached to the book itself, so touches on the empty margins never reached
-          // them, which read as "swiping doesn't work" in fullscreen specifically.
-          // Widening the cap there closes most of that gap.
-          maxWidth: isFullscreen ? Math.min(TEXT_WIDTH_MAX[prefs.textWidth] * 1.5, 900) : TEXT_WIDTH_MAX[prefs.textWidth],
-          maxHeight: isFullscreen ? "94vh" : "860px",
+          // Explicit pixel size, computed from flipRowRef (a sibling-of-content
+          // element with real, non-circular size) via the ResizeObserver above —
+          // not CSS max-width/max-height/aspect-ratio, which either left dead space
+          // (max-width/max-height alone) or collapsed to 0×0 / ignored the ratio
+          // depending on how they interacted with the surrounding flexbox here.
+          width: containerSize ? containerSize.width : TEXT_WIDTH_MAX[prefs.textWidth],
+          height: containerSize ? containerSize.height : FALLBACK_SIZE.height,
+          flexShrink: 0,
           touchAction: highlightMode ? "pan-y" : "none",
         }}
       >
