@@ -1,12 +1,15 @@
 import { BookOpen } from "lucide-react";
 
+// Both stops keep enough lightness/saturation to read clearly against the app's
+// near-black background — a gradient that fades to near-black (like the old
+// palette did) becomes visually indistinguishable from the page behind it.
 const PALETTES = [
-  ["#3b0d0d", "#0b0b0b"],
-  ["#1b2a4a", "#0b0b0b"],
-  ["#1a3a2e", "#0b0b0b"],
-  ["#3a1a3a", "#0b0b0b"],
-  ["#3a2a0a", "#0b0b0b"],
-  ["#0a2a3a", "#0b0b0b"],
+  ["#8a2f2f", "#3a1212"],
+  ["#2f4f8a", "#12203a"],
+  ["#2f6b52", "#12331f"],
+  ["#6b2f6b", "#331233"],
+  ["#8a5f1f", "#3a2c0d"],
+  ["#1f6b8a", "#0d333f"],
 ];
 
 function hash(str: string): number {
@@ -30,11 +33,13 @@ export function isRealImage(value: string): boolean {
 export default function PosterPlaceholder({
   seed,
   title,
+  author,
   className,
   iconSize = 28,
 }: {
   seed: string;
   title: string;
+  author?: string;
   className?: string;
   iconSize?: number;
 }) {
@@ -54,11 +59,18 @@ export default function PosterPlaceholder({
   const [from, to] = paletteFor(seed);
   return (
     <div
-      className={`relative flex h-full w-full items-end overflow-hidden ${className ?? ""}`}
+      className={`relative flex h-full w-full flex-col items-center justify-center overflow-hidden text-center ${className ?? ""}`}
       style={{ background: `linear-gradient(160deg, ${from}, ${to})` }}
     >
-      <BookOpen size={iconSize} className="absolute right-3 top-3 text-white/20" strokeWidth={1.5} />
-      <span className="line-clamp-3 p-3 text-sm font-semibold text-white/80">{title}</span>
+      <BookOpen size={iconSize} className="mb-3 text-white/30" strokeWidth={1.5} />
+      <span className="line-clamp-4 px-4 text-base font-black leading-snug text-white drop-shadow-[0_2px_6px_rgba(0,0,0,0.6)]">
+        {title}
+      </span>
+      {author && (
+        <span className="mt-2 line-clamp-1 px-4 text-xs font-semibold uppercase tracking-wide text-white/70">
+          {author}
+        </span>
+      )}
     </div>
   );
 }

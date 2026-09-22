@@ -14,7 +14,7 @@ export default function BookCard({ item }: { item: Book }) {
         transition={{ duration: 0.25, ease: "easeOut" }}
         className="group relative aspect-[2/3] w-[160px] cursor-pointer overflow-hidden rounded-lg bg-surface shadow-lg sm:w-[180px]"
       >
-        <PosterPlaceholder seed={item.cover || item.slug} title={item.title} className="rounded-lg" />
+        <PosterPlaceholder seed={item.cover || item.slug} title={item.title} author={item.authorName} className="rounded-lg" />
 
         {item.isFree && (
           <div className="absolute left-2 top-2">

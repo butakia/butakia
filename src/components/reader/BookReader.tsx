@@ -138,7 +138,10 @@ function CoverPage({ book, theme }: { book: Book; theme: { bg: string; text: str
       <div className="absolute inset-0">
         <PosterPlaceholder seed={book.cover || book.slug} title="" className="h-full w-full" />
       </div>
-      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/10" />
+      <div
+        className="absolute inset-0"
+        style={{ background: "linear-gradient(to top, rgba(0,0,0,0.9), rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.1))" }}
+      />
       <div className="absolute inset-x-0 bottom-0 flex flex-col gap-1.5 p-6 text-white">
         <h1 className="text-xl font-black leading-tight">{book.title}</h1>
         {book.subtitle && <p className="text-sm text-white/80">{book.subtitle}</p>}
@@ -878,7 +881,7 @@ export default function BookReader({
       // mode, which needs the opposite (natural, unbounded height so the page can
       // flow normally instead of this box's content overflowing on top of whatever
       // comes after it, like the comments section).
-      style={isFullscreen ? undefined : { height: "min(94dvh, 980px)" }}
+      style={isFullscreen ? undefined : { height: "min(90dvh, 860px)" }}
     >
       {notesPanel}
       {isFullscreen ? (
@@ -977,7 +980,7 @@ export default function BookReader({
           // them, which read as "swiping doesn't work" in fullscreen specifically.
           // Widening the cap there closes most of that gap.
           maxWidth: isFullscreen ? Math.min(TEXT_WIDTH_MAX[prefs.textWidth] * 1.5, 900) : TEXT_WIDTH_MAX[prefs.textWidth],
-          maxHeight: isFullscreen ? "94vh" : "920px",
+          maxHeight: isFullscreen ? "94vh" : "860px",
           touchAction: highlightMode ? "pan-y" : "none",
         }}
       >
