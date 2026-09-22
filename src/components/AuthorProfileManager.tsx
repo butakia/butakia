@@ -107,7 +107,7 @@ export default function AuthorProfileManager({
             </span>
           )}
         </div>
-        <Link href={`/libros/autor/${profile.slug}`} className="text-xs text-accent hover:underline">
+        <Link href={`/autor/${profile.slug}`} className="text-xs text-accent hover:underline">
           Ver mi página pública →
         </Link>
       </div>

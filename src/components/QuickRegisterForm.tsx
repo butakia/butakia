@@ -63,7 +63,7 @@ export default function QuickRegisterForm({ pendingSubmissionId }: { pendingSubm
       </p>
       <p className="text-center text-xs text-white/50">
         Elige tu usuario y contraseña para entrar directo a tu panel, ver tu aporte pendiente de
-        aprobación, y comentar en las películas y series que te interesen.
+        aprobación, y comentar en los libros que te interesen.
       </p>
 
       <input

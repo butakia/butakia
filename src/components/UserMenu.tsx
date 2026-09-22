@@ -57,14 +57,14 @@ export default function UserMenu() {
             Mi panel
           </Link>
           <Link
-            href="/mi-lista"
+            href="/#mis-favoritos"
             className="flex items-center gap-2 px-4 py-3 text-sm text-white/80 hover:bg-white/10"
           >
             <Heart size={15} />
-            Mi lista
+            Mis favoritos
           </Link>
           <Link
-            href="/libros/colecciones"
+            href="/colecciones"
             className="flex items-center gap-2 px-4 py-3 text-sm text-white/80 hover:bg-white/10"
           >
             <Library size={15} />

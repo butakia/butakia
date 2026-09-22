@@ -1,49 +1,3 @@
-export type ContentType = "movie" | "series";
-
-export interface Title {
-  id: string;
-  slug: string;
-  title: string;
-  originalTitle?: string;
-  type: ContentType;
-  year: number;
-  duration?: string;
-  rating: number;
-  ageRating?: string;
-  country?: string;
-  language?: string;
-  genres: string[];
-  tags?: string[];
-  synopsis: string;
-  poster: string;
-  backdrop: string;
-  badges?: Array<"new" | "trending" | "top10" | "4k" | "hd">;
-  customTags?: string[];
-  director?: string;
-  cast?: string[];
-  franchise?: string;
-  hasTrailer?: boolean;
-  trailerUrl?: string;
-  galleryCount?: number;
-  views?: number;
-  addedAt?: string;
-  relatedSlugs?: string[];
-  source?: {
-    kind: "video" | "iframe";
-    value: string;
-  };
-  playback?: PlaybackLanguage[];
-  featured?: boolean;
-  featuredOrder?: number;
-  seasons?: Season[];
-  uploaderName?: string;
-  trivia?: string[];
-  seoTitle?: string;
-  seoDescription?: string;
-  seoKeywords?: string[];
-  progressPercent?: number;
-}
-
 export interface Book {
   id: string;
   slug: string;
@@ -112,80 +66,6 @@ export interface BookChapter {
   pageEnd?: number;
 }
 
-export interface Report {
-  id: string;
-  titleId: string;
-  titleName: string;
-  titleSlug: string;
-  message?: string;
-  status: "open" | "resolved";
-  createdAt: string;
-}
-
-export interface EditSuggestion {
-  id: string;
-  titleId: string;
-  titleName: string;
-  titleSlug: string;
-  changes: {
-    synopsis?: string;
-    director?: string;
-    cast?: string[];
-    genres?: string[];
-    playerLink?: string;
-    posterUrl?: string;
-    backdropUrl?: string;
-  };
-  submittedBy: string;
-  status: "pending" | "approved" | "rejected";
-  createdAt: string;
-}
-
-export interface Episode {
-  id: string;
-  number: number;
-  title: string;
-  description?: string;
-  duration?: string;
-  thumbnail?: string;
-  source?: {
-    kind: "video" | "iframe";
-    value: string;
-  };
-}
-
-export interface Season {
-  id: string;
-  number: number;
-  name?: string;
-  episodes: Episode[];
-}
-
-export interface PlaybackServer {
-  id: string;
-  name: string;
-  quality?: string;
-  source: {
-    kind: "video" | "iframe";
-    value: string;
-  };
-}
-
-export interface PlaybackLanguage {
-  id: string;
-  label: string;
-  flag: string;
-  badge?: string;
-  servers: PlaybackServer[];
-}
-
-export interface Row {
-  id: string;
-  title: string;
-  subtitle?: string;
-  items: Title[];
-}
-
 export interface Contributor {
   id: string;
   name: string;
@@ -201,52 +81,6 @@ export interface Contributor {
   adminLevel?: "full" | "partial";
   userId?: string;
   followersCount?: number;
-}
-
-export interface PendingSubmission {
-  id: string;
-  title: string;
-  type: ContentType;
-  playerLink: string;
-  description?: string;
-  posterUrl?: string;
-  backdropUrl?: string;
-  seasonNumber?: number;
-  episodeNumber?: number;
-  episodeTitle?: string;
-  director?: string;
-  cast?: string[];
-  year?: number;
-  country?: string;
-  language?: string;
-  duration?: string;
-  genres?: string[];
-  franchise?: string;
-  previewConfirmed?: boolean;
-  playbackEntries?: { id: string; languageId: string; serverName: string; playerLink: string }[];
-  submittedBy: string;
-  submittedAt: string;
-}
-
-export interface HomeSection {
-  id: string;
-  title: string;
-  type: "manual" | "genre" | "newest" | "similar" | "franchise";
-  genre?: string;
-  baseTitleSlug?: string;
-  franchise?: string;
-  titleSlugs: string[];
-  order: number;
-  active: boolean;
-}
-
-export interface Comment {
-  id: string;
-  titleId: string;
-  userId: string;
-  userName: string;
-  message: string;
-  createdAt: string;
 }
 
 export interface ForumReply {
@@ -280,21 +114,11 @@ export interface Notification {
   createdAt: string;
 }
 
-export interface VoteCounts {
-  likes: number;
-  dislikes: number;
-}
-
-export type ReactionEmoji = "like" | "heart" | "cry" | "poop";
-
-export type ReactionCounts = Record<ReactionEmoji, number>;
-
 export interface SiteSettings {
   siteName: string;
   paypalLink?: string;
   yapeNumber?: string;
   yapeQrUrl?: string;
-  allowGuestPlayback: boolean;
   requireApproval: boolean;
   totalDonations: number;
   donationSharePercent: number;
@@ -310,7 +134,6 @@ export interface SiteSettings {
   librosHeroMessage: string;
   adsEnabled: boolean;
   donationsEnabled: boolean;
-  prerollEnabled: boolean;
   pdfUploadEnabled: boolean;
   fakeVisitorsEnabled: boolean;
   fakeVisitorsMin: number;
@@ -354,12 +177,6 @@ export interface PremiumRequest {
   createdAt: string;
 }
 
-export interface FranchiseDef {
-  id: string;
-  name: string;
-  logoUrl?: string;
-}
-
 export interface Tag {
   id: string;
   label: string;
@@ -382,14 +199,4 @@ export interface BlogPost {
   createdAt: string;
   updatedAt: string;
   publishedAt?: string;
-}
-
-export interface Playlist {
-  id: string;
-  contributorId: string;
-  name: string;
-  description?: string;
-  titleIds: string[];
-  titles?: Title[];
-  createdAt: string;
 }

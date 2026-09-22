@@ -10,106 +10,6 @@ datasource db {
   provider = "sqlite"
 }
 
-model Title {
-  id            String   @id @default(cuid())
-  slug          String   @unique
-  title         String
-  originalTitle String?
-  type          String // "movie" | "series"
-  year          Int
-  duration      String?
-  rating        Float    @default(0)
-  ageRating     String?
-  country       String?
-  language      String?
-  genres        String   @default("[]") // JSON string array
-  tags          String   @default("[]") // JSON string array
-  synopsis      String   @default("")
-  poster        String
-  backdrop      String
-  badges        String   @default("[]") // JSON string array
-  customTags    String   @default("[]") // JSON string array — admin-defined Tag labels
-  director      String?
-  cast          String   @default("[]") // JSON string array
-  franchise     String?
-  hasTrailer    Boolean  @default(false)
-  trailerUrl    String?
-  galleryCount  Int?
-  views         Int      @default(0)
-  addedAt       String?
-  relatedSlugs  String   @default("[]") // JSON string array
-  sourceKind    String?
-  sourceValue   String?
-  playback      String? // JSON serialized PlaybackLanguage[]
-  trivia        String   @default("[]") // JSON string array of fun facts
-  status        String   @default("published") // "published" | "draft"
-  featured      Boolean  @default(false)
-  featuredOrder Int      @default(0)
-  uploaderName  String?
-  seoTitle      String?
-  seoDescription String?
-  seoKeywords   String   @default("[]") // JSON string array
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  seasons       Season[]
-  reports       Report[]
-  editSuggestions EditSuggestion[]
-  favorites     Favorite[]
-  votes         Vote[]
-  reactions     Reaction[]
-  comments      Comment[]
-  watchHistory  WatchHistory[]
-}
-
-model Favorite {
-  id        String   @id @default(cuid())
-  userId    String
-  profileId String?
-  profile   Profile? @relation(fields: [profileId], references: [id], onDelete: Cascade)
-  titleId   String
-  title     Title    @relation(fields: [titleId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-
-  @@unique([profileId, titleId])
-}
-
-model Vote {
-  id        String   @id @default(cuid())
-  userId    String
-  profileId String?
-  profile   Profile? @relation(fields: [profileId], references: [id], onDelete: Cascade)
-  titleId   String
-  title     Title    @relation(fields: [titleId], references: [id], onDelete: Cascade)
-  value     String // "like" | "dislike"
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([profileId, titleId])
-}
-
-model Reaction {
-  id        String   @id @default(cuid())
-  userId    String
-  profileId String?
-  profile   Profile? @relation(fields: [profileId], references: [id], onDelete: Cascade)
-  titleId   String
-  title     Title    @relation(fields: [titleId], references: [id], onDelete: Cascade)
-  emoji     String // "like" | "heart" | "cry" | "poop"
-  createdAt DateTime @default(now())
-
-  @@unique([profileId, titleId])
-}
-
-model Comment {
-  id        String   @id @default(cuid())
-  titleId   String
-  title     Title    @relation(fields: [titleId], references: [id], onDelete: Cascade)
-  userId    String
-  userName  String
-  message   String
-  createdAt DateTime @default(now())
-}
-
 model Notification {
   id        String   @id @default(cuid())
   userId    String
@@ -117,19 +17,6 @@ model Notification {
   link      String?
   read      Boolean  @default(false)
   createdAt DateTime @default(now())
-}
-
-model WatchHistory {
-  id        String   @id @default(cuid())
-  userId    String
-  profileId String?
-  profile   Profile? @relation(fields: [profileId], references: [id], onDelete: Cascade)
-  titleId   String
-  title     Title    @relation(fields: [titleId], references: [id], onDelete: Cascade)
-  viewedAt  DateTime @default(now())
-  progressPercent Int @default(0)
-
-  @@unique([profileId, titleId])
 }
 
 model Profile {
@@ -142,53 +29,8 @@ model Profile {
   pinHash      String?
   isKids       Boolean        @default(false)
   createdAt    DateTime       @default(now())
-  favorites    Favorite[]
-  votes        Vote[]
-  reactions    Reaction[]
-  watchHistory WatchHistory[]
   bookFavorites    BookFavorite[]
   readingProgress  ReadingProgress[]
-}
-
-model EditSuggestion {
-  id          String   @id @default(cuid())
-  titleId     String
-  title       Title    @relation(fields: [titleId], references: [id], onDelete: Cascade)
-  changes     String // JSON string of proposed partial field changes
-  submittedBy String
-  status      String   @default("pending") // "pending" | "approved" | "rejected"
-  createdAt   DateTime @default(now())
-}
-
-model Report {
-  id        String   @id @default(cuid())
-  titleId   String
-  title     Title    @relation(fields: [titleId], references: [id], onDelete: Cascade)
-  message   String?
-  status    String   @default("open") // "open" | "resolved"
-  createdAt DateTime @default(now())
-}
-
-model Season {
-  id       String    @id @default(cuid())
-  titleId  String
-  title    Title     @relation(fields: [titleId], references: [id], onDelete: Cascade)
-  number   Int
-  name     String?
-  episodes Episode[]
-}
-
-model Episode {
-  id          String  @id @default(cuid())
-  seasonId    String
-  season      Season  @relation(fields: [seasonId], references: [id], onDelete: Cascade)
-  number      Int
-  title       String
-  description String?
-  duration    String?
-  thumbnail   String?
-  sourceKind  String?
-  sourceValue String?
 }
 
 model BlogPost {
@@ -213,7 +55,6 @@ model Contributor {
   name          String
   avatarSeed    String
   avatarUrl     String?
-  uploads       Int       @default(0)
   bookUploads   Int       @default(0)
   joinedAt      String
   badge         String? // "gold" | "silver" | "bronze"
@@ -224,26 +65,7 @@ model Contributor {
   userId        String?   @unique
   user          User?     @relation(fields: [userId], references: [id])
   followers     Follow[]
-  playlists     Playlist[]
   books         Book[]
-}
-
-model Playlist {
-  id            String      @id @default(cuid())
-  contributorId String
-  contributor   Contributor @relation(fields: [contributorId], references: [id], onDelete: Cascade)
-  name          String
-  description   String?
-  titleIds      String      @default("[]") // JSON string array of Title ids, order preserved
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-}
-
-model Franchise {
-  id        String   @id @default(cuid())
-  name      String   @unique
-  logoUrl   String?
-  createdAt DateTime @default(now())
 }
 
 model Follow {
@@ -254,31 +76,6 @@ model Follow {
   createdAt     DateTime    @default(now())
 
   @@unique([userId, contributorId])
-}
-
-model PendingSubmission {
-  id               String   @id @default(cuid())
-  title            String
-  type             String // "movie" | "series"
-  playerLink       String
-  description      String?
-  posterUrl        String?
-  backdropUrl      String?
-  seasonNumber     Int?
-  episodeNumber    Int?
-  episodeTitle     String?
-  director         String?
-  cast             String   @default("[]") // JSON string array
-  year             Int?
-  country          String?
-  language         String?
-  duration         String?
-  genres           String   @default("[]") // JSON string array
-  franchise        String?
-  previewConfirmed Boolean  @default(false)
-  playbackEntries  String   @default("[]") // JSON array of {id, languageId, serverName, playerLink}
-  submittedBy      String   @default("Anónimo")
-  submittedAt      DateTime @default(now())
 }
 
 model User {
@@ -315,26 +112,14 @@ model PremiumRequest {
   createdAt   DateTime @default(now())
 }
 
-model HomeSection {
-  id            String  @id @default(cuid())
-  title         String
-  type          String  @default("manual") // "manual" | "genre" | "newest" | "similar" | "franchise"
-  genre         String?
-  baseTitleSlug String?
-  franchise     String?
-  titleSlugs    String  @default("[]") // JSON string array, used when type = "manual"
-  order         Int     @default(0)
-  active        Boolean @default(true)
-}
-
 model ForumThread {
   id        String       @id @default(cuid())
   title     String
   body      String
   authorName String
   authorId  String?
-  section   String       @default("movies") // "movies" | "books" — keeps the two communities' threads apart
-  category  String       @default("general") // movies: "general" | "ayuda" | "sugerencias" | "peliculas"; books: "general" | "recomendaciones" | "autores" | "ayuda-lectura" | "debate"
+  section   String       @default("books") // kept for schema stability; the site only has one community now
+  category  String       @default("general") // "general" | "recomendaciones" | "autores" | "ayuda-lectura" | "debate"
   pinned    Boolean      @default(false)
   createdAt DateTime     @default(now())
   replies   ForumReply[]
@@ -358,7 +143,6 @@ model SiteSettings {
   paypalLink           String?
   yapeNumber           String?
   yapeQrUrl            String?
-  allowGuestPlayback   Boolean @default(true)
   requireApproval      Boolean @default(true)
   totalDonations       Float   @default(0)
   donationSharePercent Float   @default(10)
@@ -374,7 +158,6 @@ model SiteSettings {
   librosHeroMessage    String  @default("")
   adsEnabled           Boolean @default(true)
   donationsEnabled     Boolean @default(true)
-  prerollEnabled       Boolean @default(true)
   pdfUploadEnabled     Boolean @default(true)
   fakeVisitorsEnabled  Boolean @default(false)
   fakeVisitorsMin      Int     @default(20)
@@ -383,7 +166,7 @@ model SiteSettings {
   // --- Personalización del sitio (CMS) ---
   logoUrl              String?
   faviconUrl           String?
-  siteDescription      String  @default("Butakia es la plataforma colaborativa para ver películas y series online gratis, en HD y en español latino.")
+  siteDescription      String  @default("Butakia es la plataforma colaborativa para leer libros gratis online: novelas, cuentos, poesía y más.")
   secondaryColor       String  @default("#161616")
   bannerUrl            String?
   bannerLink           String?
@@ -400,7 +183,7 @@ model SiteSettings {
 }
 
 // Admin-defined labels ("NUEVO", "4K", "RECOMENDADO"...) that can be attached to
-// any Title or Book, instead of the old fixed ALL_BADGES list baked into the form.
+// any Book, instead of the old fixed ALL_BADGES list baked into the form.
 model Tag {
   id        String   @id @default(cuid())
   label     String   @unique
@@ -421,7 +204,7 @@ model AdSlot {
   id         String   @id @default(cuid())
   name       String
   iframeCode String
-  placement  String // "popup" | "square" | "under_row" | "player" | "libros_home" | "titulo_detalle" | "libro_detalle" | "explorar"
+  placement  String // "popup" | "square" | "libros_home" | "libro_detalle"
   sizePreset String   @default("responsive") // "responsive" | "300x250" | "728x90" | "160x600" | "320x50"
   active     Boolean  @default(true)
   order      Int      @default(0)

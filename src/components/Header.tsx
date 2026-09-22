@@ -3,42 +3,31 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Circle, Upload, Menu, X } from "lucide-react";
+import { PenLine, Menu, X } from "lucide-react";
 import Logo from "./Logo";
-import SearchBar from "./SearchBar";
+import BookHeaderSearch from "./BookHeaderSearch";
 import UserMenu from "./UserMenu";
 import NotificationBell from "./NotificationBell";
 import { useAuth } from "./AuthProvider";
-import { useSiteSettings } from "./SiteSettingsProvider";
-import { useLocale } from "./LocaleProvider";
-import { useFakeVisitorCount } from "@/lib/use-fake-visitor-count";
-import type { DictionaryKey } from "@/lib/i18n/dictionaries";
 
-const LINK_KEYS: { key: DictionaryKey; href: string }[] = [
-  { key: "nav.home", href: "/" },
-  { key: "nav.movies", href: "/explorar?tipo=movie" },
-  { key: "nav.series", href: "/explorar?tipo=series" },
-  { key: "nav.books", href: "/libros" },
-  { key: "nav.franchises", href: "/franquicias" },
-  { key: "nav.contributors", href: "/colaboradores" },
-  { key: "nav.forum", href: "/foro" },
-  { key: "nav.blog", href: "/blog" },
-  { key: "nav.help", href: "/ayuda" },
+const CATEGORIES = [
+  { label: "Inicio", href: "" },
+  { label: "Cuentos", href: "/genero/Cuentos" },
+  { label: "Novela", href: "/genero/Novela" },
+  { label: "Poesía", href: "/genero/Poesía" },
+  { label: "Ensayo", href: "/genero/Ensayo" },
+  { label: "Terror", href: "/genero/Terror" },
+  { label: "Ciencia Ficción", href: "/genero/Ciencia Ficción" },
+  { label: "Dominio Público", href: "/genero/Dominio Público" },
+  { label: "Foro", href: "/foro" },
 ];
 
-// El logo ya enlaza al inicio, así que en el menú de escritorio omitimos "Inicio"
-// para ganar espacio — en el menú móvil sí se muestra explícito.
-const DESKTOP_LINK_KEYS = LINK_KEYS.filter((l) => l.key !== "nav.home");
-
-export default function Header() {
+export default function Header({ tagline = "Libros" }: { tagline?: string }) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
   const user = useAuth();
   const isLoggedIn = Boolean(user);
-  const { fakeVisitorsEnabled, fakeVisitorsMin, fakeVisitorsMax } = useSiteSettings();
-  const visitorCount = useFakeVisitorCount(fakeVisitorsMin, fakeVisitorsMax);
-  const { t } = useLocale();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -53,74 +42,68 @@ export default function Header() {
 
   return (
     <header
-      className={`fixed inset-x-0 top-0 z-50 flex items-center justify-between px-3 py-4 transition-colors duration-300 sm:px-6 md:px-10 ${
+      className={`fixed inset-x-0 top-0 z-50 flex items-center justify-between px-6 py-4 transition-colors duration-300 md:px-10 ${
         scrolled ? "bg-background/95 backdrop-blur-sm border-b border-border" : "bg-gradient-to-b from-black/80 to-transparent"
       }`}
     >
-      <div className="flex min-w-0 items-center gap-5 2xl:gap-8">
-        <Logo />
-        <nav className="hidden min-w-0 items-center gap-2.5 text-sm text-muted xl:flex 2xl:gap-5">
-          {DESKTOP_LINK_KEYS.map((link) => (
+      <div className="flex items-center gap-8">
+        <Logo subtitle={tagline} />
+        <nav className="hidden items-center gap-5 text-sm text-muted lg:flex">
+          {CATEGORIES.map((link) => (
             <Link
-              key={link.key}
+              key={link.label}
               href={link.href}
               className={`whitespace-nowrap transition-colors hover:text-foreground ${
                 pathname === link.href ? "font-semibold text-foreground" : ""
               }`}
             >
-              {t(link.key)}
+              {link.label}
             </Link>
           ))}
         </nav>
       </div>
 
-      <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+      <div className="flex items-center gap-1.5 sm:gap-4">
         <Link
-          href="/subir"
-          className="hidden items-center gap-1.5 whitespace-nowrap rounded-full border border-accent/50 px-3.5 py-1.5 text-xs font-semibold text-accent transition-colors hover:bg-accent/10 sm:flex"
+          href="/publicar"
+          className="hidden items-center gap-1.5 rounded-full border border-accent/50 px-3.5 py-1.5 text-sm font-semibold text-accent transition-colors hover:bg-accent/10 sm:flex"
         >
-          <Upload size={15} className="shrink-0" />
-          {t("nav.upload")}
+          <PenLine size={15} />
+          Publicar
         </Link>
-        <SearchBar />
+        <BookHeaderSearch />
         <NotificationBell isLoggedIn={isLoggedIn} />
         <UserMenu />
 
         <button
           onClick={() => setMobileMenuOpen((v) => !v)}
           aria-label={mobileMenuOpen ? "Cerrar menú" : "Abrir menú"}
-          className="flex h-9 w-9 items-center justify-center rounded-full text-foreground/80 transition-colors hover:bg-white/10 xl:hidden"
+          className="flex h-9 w-9 items-center justify-center rounded-full text-foreground/80 transition-colors hover:bg-white/10 lg:hidden"
         >
           {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
         </button>
       </div>
 
       {mobileMenuOpen && (
-        <nav className="absolute inset-x-0 top-full flex flex-col border-b border-border bg-background/98 p-4 backdrop-blur-md transition-all duration-150 xl:hidden">
-          {LINK_KEYS.map((link) => (
+        <nav className="absolute inset-x-0 top-full flex flex-col border-b border-border bg-background/98 p-4 backdrop-blur-md transition-all duration-150 lg:hidden">
+          {CATEGORIES.map((link) => (
             <Link
-              key={link.key}
+              key={link.label}
               href={link.href}
               className={`rounded-lg px-3 py-3 text-sm ${
                 pathname === link.href ? "font-semibold text-foreground" : "text-muted"
               }`}
             >
-              {t(link.key)}
+              {link.label}
             </Link>
           ))}
           <Link
-            href="/subir"
+            href="/publicar"
             className="mt-2 flex items-center justify-center gap-1.5 rounded-lg border border-accent/50 px-3.5 py-2.5 text-sm font-semibold text-accent"
           >
-            <Upload size={15} />
-            {t("nav.uploadContent")}
+            <PenLine size={15} />
+            Publicar libro
           </Link>
-          {fakeVisitorsEnabled && (
-            <div className="mt-3 flex items-center justify-center gap-1.5 text-xs text-muted">
-              <Circle size={8} className="fill-green-500 text-green-500 animate-pulse" />
-              <span className="font-semibold text-foreground">{visitorCount}</span> {t("nav.visitorsNow")}
-            </div>
-          )}
         </nav>
       )}
     </header>

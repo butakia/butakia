@@ -11,8 +11,8 @@ export const metadata: Metadata = {
 const FAQS = [
   {
     icon: Upload,
-    q: "¿Cómo subo una película o serie?",
-    a: 'Ve a "Subir" en el menú superior, completa el formulario con el enlace del reproductor y la portada, confirma que el enlace se visualiza correctamente, y envíalo. Quedará pendiente de revisión antes de publicarse.',
+    q: "¿Cómo publico un libro?",
+    a: 'Ve a "Publicar" en el menú superior, completa el formulario con el texto, PDF o editor enriquecido, la portada y los datos del libro, y envíalo. Quedará pendiente de revisión antes de publicarse.',
   },
   {
     icon: ShieldQuestion,
@@ -26,8 +26,8 @@ const FAQS = [
   },
   {
     icon: MessageCircleQuestion,
-    q: "Encontré un enlace caído, ¿qué hago?",
-    a: 'En la página de reproducción de cualquier título encontrarás el botón "Reportar servidor caído", donde puedes avisarnos con un comentario opcional para que lo revisemos.',
+    q: "Encontré un libro con derechos de autor infringidos, ¿qué hago?",
+    a: 'En la página de cualquier libro encontrarás el botón "Reportar", donde puedes indicarnos el motivo (derechos de autor, contenido ilegal, spam, etc.) para que lo revisemos.',
   },
 ];
 

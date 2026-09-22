@@ -72,7 +72,7 @@ export default function FooterLinks() {
   return (
     <>
       <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
-        <Link href="/libros" className="hover:text-foreground">{t("footer.books")}</Link>
+        <Link href="/" className="hover:text-foreground">{t("footer.books")}</Link>
         <Link href="/blog" className="hover:text-foreground">{t("nav.blog")}</Link>
         <Link href="/premium" className="hover:text-foreground">{t("footer.premium")}</Link>
         <Link href="/contacto" className="hover:text-foreground">{t("footer.contact")}</Link>

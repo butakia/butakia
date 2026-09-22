@@ -28,7 +28,7 @@ interface FormState {
 const EMPTY_FORM: FormState = {
   name: "",
   iframeCode: "",
-  placement: "under_row",
+  placement: "square",
   sizePreset: "responsive",
   active: true,
   order: 0,

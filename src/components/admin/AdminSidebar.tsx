@@ -4,16 +4,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
-  Film,
-  Inbox,
   Users,
   Settings,
   ArrowLeftCircle,
   Armchair,
-  LayoutList,
   AlertTriangle,
-  Pencil,
-  Flame,
   Crown,
   Database,
   BookOpen,
@@ -24,18 +19,12 @@ import {
 
 const NAV = [
   { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
-  { label: "Contenido", href: "/admin/contenido", icon: Film },
   { label: "Libros", href: "/admin/libros", icon: BookOpen },
   { label: "Autores literarios", href: "/admin/libros-autores", icon: Users },
   { label: "Reportes de libros", href: "/admin/libros-reportes", icon: AlertTriangle },
   { label: "Ventas de libros", href: "/admin/libros-ventas", icon: Crown },
-  { label: "Secciones", href: "/admin/secciones", icon: LayoutList },
-  { label: "Franquicias", href: "/admin/franquicias", icon: Flame },
   { label: "Etiquetas", href: "/admin/etiquetas", icon: Tag },
   { label: "Blog", href: "/admin/blog", icon: Newspaper },
-  { label: "Pendientes", href: "/admin/pendientes", icon: Inbox },
-  { label: "Ediciones", href: "/admin/ediciones", icon: Pencil },
-  { label: "Reportes", href: "/admin/reportes", icon: AlertTriangle },
   { label: "Premium", href: "/admin/premium", icon: Crown },
   { label: "Anuncios", href: "/admin/anuncios", icon: Megaphone },
   { label: "Colaboradores", href: "/admin/colaboradores", icon: Users },
@@ -44,15 +33,9 @@ const NAV = [
 ];
 
 export default function AdminSidebar({
-  pendingCount,
-  reportsCount,
-  editSuggestionsCount,
   premiumRequestsCount,
   bookReportsCount = 0,
 }: {
-  pendingCount: number;
-  reportsCount: number;
-  editSuggestionsCount: number;
   premiumRequestsCount: number;
   bookReportsCount?: number;
 }) {
@@ -74,17 +57,11 @@ export default function AdminSidebar({
           const active = pathname === item.href;
           const Icon = item.icon;
           const badgeCount =
-            item.href === "/admin/pendientes"
-              ? pendingCount
-              : item.href === "/admin/reportes"
-                ? reportsCount
-                : item.href === "/admin/ediciones"
-                  ? editSuggestionsCount
-                  : item.href === "/admin/premium"
-                    ? premiumRequestsCount
-                    : item.href === "/admin/libros-reportes"
-                      ? bookReportsCount
-                      : 0;
+            item.href === "/admin/premium"
+              ? premiumRequestsCount
+              : item.href === "/admin/libros-reportes"
+                ? bookReportsCount
+                : 0;
           return (
             <Link
               key={item.href}

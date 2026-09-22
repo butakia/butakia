@@ -1,112 +1,134 @@
-import { Fragment } from "react";
-import Header from "@/components/Header";
-import Hero from "@/components/Hero";
-import ContentRow from "@/components/ContentRow";
-import Footer from "@/components/Footer";
-import CommunityBanner from "@/components/CommunityBanner";
-import UploadIncentiveBanner from "@/components/UploadIncentiveBanner";
-import AdBanner from "@/components/AdBanner";
-import UnderRowAd from "@/components/ads/UnderRowAd";
-import CrossPromoCard from "@/components/CrossPromoCard";
-import PromoBanner from "@/components/PromoBanner";
-import { BookOpen } from "lucide-react";
+import type { Metadata } from "next";
+import Link from "next/link";
+import { PenLine } from "lucide-react";
 import {
-  getFeaturedList,
-  getRows,
-  getRecentlyViewed,
-  getFavoriteTitles,
-  getContributorByUserId,
-  getSiteSettings,
-} from "@/lib/data";
+  getAllBooks,
+  getTrendingBooks,
+  getFreeBooks,
+  getFeaturedBooks,
+  getBooksByGenre,
+  getAllBookGenres,
+  getFavoriteBooks,
+  getContinueReadingBooks,
+  getRecommendedForUser,
+  attachReadingProgress,
+} from "@/lib/books-data";
 import { getCurrentUser, getActiveProfile } from "@/lib/dal";
-import { filterForKids } from "@/lib/kidsMode";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import BookRow from "@/components/BookRow";
+import BookSearchBar from "@/components/BookSearchBar";
+import AdFrame from "@/components/ads/AdFrame";
+import { getActiveAdsByPlacement } from "@/lib/ads-data";
+import { getSiteSettings } from "@/lib/data";
 
-export default async function Home() {
-  const [featuredListRaw, rowsRaw, user, settings, profile] = await Promise.all([
-    getFeaturedList(),
-    getRows(),
+export const metadata: Metadata = {
+  title: {
+    absolute: "Butakia — Lee Libros Gratis Online",
+  },
+  description:
+    "La biblioteca digital de Butakia: novelas, cuentos, ensayos, poesía y obras de dominio público para leer gratis en línea.",
+};
+
+export default async function HomePage() {
+  const [user, profile, all, trending, free, featured, genres, libroAds, settings] = await Promise.all([
     getCurrentUser(),
-    getSiteSettings(),
     getActiveProfile(),
+    getAllBooks(),
+    getTrendingBooks(),
+    getFreeBooks(),
+    getFeaturedBooks(),
+    getAllBookGenres(),
+    getActiveAdsByPlacement("libros_home"),
+    getSiteSettings(),
   ]);
-  const showAds = settings.premiumEnabled && !user?.isPremium;
-  const profileId = profile?.id ?? null;
-  const isKids = Boolean(profile?.isKids);
 
-  const featuredList = filterForKids(featuredListRaw, isKids);
-  const rows = rowsRaw
-    .map((row) => ({ ...row, items: filterForKids(row.items, isKids) }))
-    .filter((row) => row.items.length > 0);
-
-  const [recentlyViewedRaw, favoriteTitlesRaw, contributor] = user
-    ? await Promise.all([
-        getRecentlyViewed(user.id, 12, profileId),
-        getFavoriteTitles(user.id, profileId),
-        getContributorByUserId(user.id),
-      ])
-    : [[], [], undefined];
-  const recentlyViewed = filterForKids(recentlyViewedRaw, isKids);
-  const favoriteTitles = filterForKids(favoriteTitlesRaw, isKids);
-
-  if (!featuredList.length) {
-    return (
-      <>
-        <Header />
-        <main className="flex-1 px-6 py-24 text-center text-white/50">
-          Aún no hay contenido publicado.
-        </main>
-        <Footer />
-      </>
-    );
+  let favorites = [] as Awaited<ReturnType<typeof getFavoriteBooks>>;
+  let continueReading = [] as Awaited<ReturnType<typeof getContinueReadingBooks>>;
+  let recommended = [] as Awaited<ReturnType<typeof getRecommendedForUser>>;
+  if (user) {
+    [favorites, continueReading, recommended] = await Promise.all([
+      getFavoriteBooks(user.id, profile?.id ?? null),
+      getContinueReadingBooks(user.id, profile?.id ?? null),
+      getRecommendedForUser(user.id, profile?.id ?? null),
+    ]);
+    favorites = await attachReadingProgress(favorites, user.id, profile?.id ?? null);
+    continueReading = await attachReadingProgress(continueReading, user.id, profile?.id ?? null);
   }
+
+  const genreBooks = await Promise.all(genres.slice(0, 8).map((g) => getBooksByGenre(g)));
+  const showAds = settings.adsEnabled && !user?.isPremium;
 
   return (
     <>
-      <Header />
-      <main className="flex-1">
-        <Hero titles={featuredList} />
-        {settings.bannerEnabled && settings.bannerUrl && (
-          <PromoBanner imageUrl={settings.bannerUrl} link={settings.bannerLink} />
-        )}
-        {contributor ? (
-          <UploadIncentiveBanner uploads={contributor.uploads} />
-        ) : (
-          <CommunityBanner />
-        )}
-        <div className="px-6 pt-8 md:px-10">
-          <CrossPromoCard
-            icon={BookOpen}
-            question="¿Disfrutas de los libros?"
-            cta="Prueba Butakia Libros: novelas, cuentos, poesía y más, gratis."
-            href="/libros"
-          />
-        </div>
-        <div className="flex flex-col gap-10 py-8">
-          {recentlyViewed.length > 0 && (
-            <ContentRow
-              row={{
-                id: "continuar",
-                title: "Continuar viendo",
-                subtitle: "Progreso estimado según tu tiempo en la página, no tu posición exacta.",
-                items: recentlyViewed,
-              }}
-            />
-          )}
-          {favoriteTitles.length > 0 && (
-            <ContentRow row={{ id: "mi-lista", title: "Mi Lista", items: favoriteTitles.slice(0, 12) }} />
-          )}
-          {rows.map((row, i) => (
-            <Fragment key={row.id}>
-              <ContentRow row={row} />
-              {i === 1 && showAds && (
-                <>
-                  <AdBanner />
-                  <UnderRowAd />
-                </>
+      <Header tagline={settings.librosTagline} />
+      <main className="flex-1 pb-16 pt-28">
+        <div className="mx-auto max-w-7xl px-6 md:px-10">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-black text-white">Butakia Libros</h1>
+              <p className="mt-2 text-sm text-white/50">
+                {all.length} {all.length === 1 ? "obra disponible" : "obras disponibles"} para leer gratis.
+              </p>
+              {settings.librosHeroMessage && (
+                <p className="mt-1 max-w-xl text-sm text-white/70">{settings.librosHeroMessage}</p>
               )}
-            </Fragment>
-          ))}
+            </div>
+            <Link
+              href="/publicar"
+              className="flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-white transition-transform hover:scale-[1.02] active:scale-95"
+            >
+              <PenLine size={16} />
+              Publicar mi obra
+            </Link>
+          </div>
+
+          <div className="mt-6">
+            <BookSearchBar />
+          </div>
         </div>
+
+        {all.length === 0 ? (
+          <div className="mx-auto mt-16 max-w-7xl px-6 md:px-10">
+            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-10 text-center">
+              <p className="text-white/60">Aún no hay libros publicados. Vuelve pronto.</p>
+            </div>
+          </div>
+        ) : (
+          <div className="mt-8 flex flex-col gap-8">
+            {continueReading.length > 0 && (
+              <BookRow
+                title="Continuar leyendo"
+                subtitle="Progreso estimado según tu última sesión de lectura."
+                items={continueReading}
+              />
+            )}
+            {recommended.length > 0 && (
+              <BookRow
+                title="Recomendados para ti"
+                subtitle="Según tus favoritos y lecturas."
+                items={recommended}
+              />
+            )}
+            <BookRow title="Destacados" items={featured} />
+            <BookRow title="Más leídos" items={trending} />
+            {showAds && libroAds[0] && (
+              <div className="mx-auto w-full max-w-7xl px-6 md:px-10">
+                <AdFrame ad={libroAds[0]} className="overflow-hidden rounded-xl" />
+              </div>
+            )}
+            <BookRow title="Novedades" items={all.slice(0, 20)} />
+            <BookRow title="Libros gratuitos" items={free} />
+            {favorites.length > 0 && (
+              <div id="mis-favoritos">
+                <BookRow title="Mis favoritos" items={favorites} />
+              </div>
+            )}
+            {genres.slice(0, 8).map((genre, i) => (
+              <BookRow key={genre} title={genre} items={genreBooks[i]} />
+            ))}
+          </div>
+        )}
       </main>
       <Footer />
     </>

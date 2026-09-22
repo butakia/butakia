@@ -130,7 +130,7 @@ function CoverPage({ book, theme }: { book: Book; theme: { bg: string; text: str
   return (
     <div className="relative h-full w-full overflow-hidden">
       <div className="absolute inset-0">
-        <PosterPlaceholder seed={book.cover || book.slug} title="" className="h-full w-full" icon="book" />
+        <PosterPlaceholder seed={book.cover || book.slug} title="" className="h-full w-full" />
       </div>
       <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/10" />
       <div className="absolute inset-x-0 bottom-0 flex flex-col gap-1.5 p-6 text-white">
@@ -1065,7 +1065,7 @@ export default function BookReader({
           onClose={() => setShowFavoriteCelebration(false)}
         >
           <div className="mt-2 flex w-full flex-col gap-4">
-            <Link href="/libros#mis-favoritos" className="text-xs font-semibold text-accent hover:underline">
+            <Link href="/#mis-favoritos" className="text-xs font-semibold text-accent hover:underline">
               Ver en Mi Lista →
             </Link>
             <ShareRow slug={book.slug} title={book.title} />

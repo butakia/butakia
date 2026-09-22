@@ -17,7 +17,7 @@ export default function Logo({
 
   return (
     <Link
-      href={subtitle ? "/libros" : "/"}
+      href="/"
       aria-label={`Ir al inicio de ${siteName}`}
       className={`group flex min-w-0 items-center gap-1.5 transition-transform duration-200 hover:scale-[1.03] active:scale-95 sm:gap-2 ${className ?? ""}`}
     >

@@ -8,7 +8,7 @@ import { setSecurityQuestionsAction } from "@/lib/auth-actions";
 const SUGGESTED_QUESTIONS = [
   "¿Cuál era el nombre de tu primera mascota?",
   "¿En qué ciudad naciste?",
-  "¿Cuál es tu película favorita?",
+  "¿Cuál es tu libro favorito?",
   "¿Cuál era el nombre de tu escuela primaria?",
 ];
 

@@ -80,9 +80,8 @@ export default function TagManager({ tags }: { tags: Tag[] }) {
           </button>
         </div>
         <p className="mt-2 text-[11px] text-white/40">
-          Crea cualquier etiqueta que necesites (NUEVO, 4K, RECOMENDADO, MEJOR VALORADO, CALIDAD HD,
-          etc). Luego podrás asignarlas a cualquier película, serie o libro desde su formulario de
-          edición.
+          Crea cualquier etiqueta que necesites (NUEVO, RECOMENDADO, MEJOR VALORADO, etc). Luego
+          podrás asignarlas a cualquier libro desde su formulario de edición.
         </p>
       </div>
 

@@ -79,8 +79,8 @@ export default async function CreditosPage() {
 
           <p className="mt-10 text-center text-sm text-white/40">
             ¿Quieres aparecer aquí?{" "}
-            <Link href="/subir" className="text-accent hover:underline">
-              Sube contenido
+            <Link href="/publicar" className="text-accent hover:underline">
+              Sube un libro
             </Link>{" "}
             y sé constante — las insignias y roles de administrador se otorgan a los colaboradores
             más activos y confiables.

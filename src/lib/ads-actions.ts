@@ -16,10 +16,7 @@ export interface AdSlotInput {
 
 function revalidateAdPaths() {
   revalidatePath("/");
-  revalidatePath("/libros");
-  revalidatePath("/explorar");
-  revalidatePath("/titulo/[slug]", "page");
-  revalidatePath("/libros/[slug]", "page");
+  revalidatePath("/[slug]", "page");
   revalidatePath("/admin/anuncios");
 }
 

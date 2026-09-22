@@ -1,26 +1,21 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Film, Tv, Compass, Pencil, ExternalLink, Trophy, Clock } from "lucide-react";
+import { BookOpen, Pencil, ExternalLink, Trophy } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ContributorBadge from "@/components/ContributorBadge";
 import ContributorDonationCard from "@/components/ContributorDonationCard";
 import AchievementsProgress from "@/components/AchievementsProgress";
-import PlaylistManager from "@/components/PlaylistManager";
 import SecurityQuestionsBanner from "@/components/SecurityQuestionsBanner";
 import ReferralCard from "@/components/ReferralCard";
 import BookRow from "@/components/BookRow";
 import {
   getContributorByUserId,
-  getTitlesByUploader,
   getSiteSettings,
   getTotalUploadsCount,
-  getPendingSubmissionsByName,
-  getPlaylistsByContributor,
-  getAllTitles,
   hasSecurityQuestions,
 } from "@/lib/data";
-import { getContinueReadingBooks, attachReadingProgress } from "@/lib/books-data";
+import { getContinueReadingBooks, attachReadingProgress, getBooksByContributor } from "@/lib/books-data";
 import { getCurrentUser, getActiveProfile } from "@/lib/dal";
 import { getOrCreateReferralCode } from "@/lib/referral";
 import { SITE_URL } from "@/lib/constants";
@@ -32,14 +27,11 @@ export default async function PanelPage() {
   const contributor = await getContributorByUserId(user.id);
   if (!contributor) redirect("/");
 
-  const [titles, settings, totalUploads, pendingSubmissions, playlists, allTitles, hasQuestions, referralCode, profile] =
+  const [settings, totalUploads, books, hasQuestions, referralCode, profile] =
     await Promise.all([
-      getTitlesByUploader(contributor.name),
       getSiteSettings(),
       getTotalUploadsCount(),
-      getPendingSubmissionsByName(contributor.name),
-      getPlaylistsByContributor(contributor.id),
-      getAllTitles(),
+      getBooksByContributor(contributor.id),
       hasSecurityQuestions(user.id),
       getOrCreateReferralCode(user.id),
       getActiveProfile(),
@@ -47,10 +39,6 @@ export default async function PanelPage() {
 
   let continueReadingBooks = await getContinueReadingBooks(user.id, profile?.id ?? null);
   continueReadingBooks = await attachReadingProgress(continueReadingBooks, user.id, profile?.id ?? null);
-
-  const movies = titles.filter((t) => t.type === "movie" && !t.genres.includes("Documentary"));
-  const series = titles.filter((t) => t.type === "series");
-  const documentaries = titles.filter((t) => t.genres.includes("Documentary"));
 
   return (
     <>
@@ -115,31 +103,17 @@ export default async function PanelPage() {
             </div>
           )}
 
-          <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-2">
             <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4 text-center">
               <p className="text-2xl font-black text-accent">{contributor.uploads}</p>
               <p className="text-xs text-white/50">aportes totales</p>
             </div>
             <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4 text-center">
               <p className="flex items-center justify-center gap-1 text-2xl font-black text-white">
-                <Film size={16} className="text-white/40" />
-                {movies.length}
+                <BookOpen size={16} className="text-white/40" />
+                {books.length}
               </p>
-              <p className="text-xs text-white/50">películas</p>
-            </div>
-            <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4 text-center">
-              <p className="flex items-center justify-center gap-1 text-2xl font-black text-white">
-                <Tv size={16} className="text-white/40" />
-                {series.length}
-              </p>
-              <p className="text-xs text-white/50">series</p>
-            </div>
-            <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4 text-center">
-              <p className="flex items-center justify-center gap-1 text-2xl font-black text-white">
-                <Compass size={16} className="text-white/40" />
-                {documentaries.length}
-              </p>
-              <p className="text-xs text-white/50">documentales</p>
+              <p className="text-xs text-white/50">libros</p>
             </div>
           </div>
 
@@ -172,46 +146,17 @@ export default async function PanelPage() {
             </div>
           </div>
 
-          {pendingSubmissions.length > 0 && (
-            <div className="mt-8 rounded-2xl border border-yellow-500/20 bg-yellow-500/5 p-5">
-              <h2 className="mb-3 flex items-center gap-2 font-bold text-white">
-                <Clock size={17} className="text-yellow-500" />
-                Pendiente de aprobación
-              </h2>
-              <div className="flex flex-col gap-2">
-                {pendingSubmissions.map((p) => (
-                  <div
-                    key={p.id}
-                    className="flex items-center justify-between gap-3 rounded-lg border border-white/10 bg-white/[0.03] px-3.5 py-2.5 text-sm"
-                  >
-                    <span className="truncate text-white/80">{p.title}</span>
-                    <span className="shrink-0 rounded-full bg-yellow-500/15 px-2.5 py-1 text-[11px] font-bold uppercase text-yellow-500">
-                      En revisión
-                    </span>
-                  </div>
-                ))}
-              </div>
-              <p className="mt-3 text-xs text-white/40">
-                Te avisaremos con una notificación en cuanto el equipo de Butakia revise tu aporte.
-              </p>
-            </div>
-          )}
-
-          <div className="mt-8">
-            <PlaylistManager playlists={playlists} allTitles={allTitles} />
-          </div>
-
-          {titles.length > 0 && (
+          {books.length > 0 && (
             <div className="mt-8">
-              <h2 className="mb-3 font-bold text-white">Mi contenido subido</h2>
+              <h2 className="mb-3 font-bold text-white">Mis libros subidos</h2>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 md:grid-cols-6">
-                {titles.slice(0, 12).map((t) => (
+                {books.slice(0, 12).map((b) => (
                   <Link
-                    key={t.id}
-                    href={`/titulo/${t.slug}`}
+                    key={b.id}
+                    href={`/${b.slug}`}
                     className="truncate rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-xs text-white/70 hover:bg-white/10"
                   >
-                    {t.title}
+                    {b.title}
                   </Link>
                 ))}
               </div>
@@ -219,15 +164,15 @@ export default async function PanelPage() {
           )}
 
           <div className="mt-8 rounded-2xl border border-white/10 bg-white/[0.03] p-5">
-            <h2 className="mb-1 font-bold text-white">¿Quieres subir más contenido?</h2>
+            <h2 className="mb-1 font-bold text-white">¿Quieres subir más libros?</h2>
             <p className="mb-3 text-sm text-white/60">
-              Sube una nueva película o serie y suma un aporte más a tu perfil.
+              Publica un nuevo libro y suma un aporte más a tu perfil.
             </p>
             <Link
-              href="/subir"
+              href="/publicar"
               className="inline-flex items-center gap-2 rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-white transition-transform hover:scale-[1.02] active:scale-95"
             >
-              Subir contenido
+              Publicar libro
             </Link>
           </div>
         </div>

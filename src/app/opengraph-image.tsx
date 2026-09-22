@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 
-export const alt = "Butakia — Ver películas y series online gratis";
+export const alt = "Butakia — Lee libros gratis online";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -38,14 +38,14 @@ export default async function Image() {
               fontSize: 56,
             }}
           >
-            🎬
+            📚
           </div>
           <div style={{ display: "flex", fontSize: 104, fontWeight: 900, color: "white", letterSpacing: -2 }}>
             Buta<span style={{ color: "#e50914" }}>kia</span>
           </div>
         </div>
         <div style={{ display: "flex", fontSize: 34, color: "rgba(255,255,255,0.65)", marginTop: 28 }}>
-          Ver películas y series online, gratis
+          Lee libros gratis online
         </div>
       </div>
     ),

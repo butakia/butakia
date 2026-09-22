@@ -8,13 +8,13 @@ import PosterPlaceholder from "./PosterPlaceholder";
 
 export default function BookCard({ item }: { item: Book }) {
   return (
-    <Link href={`/libros/${item.slug}`} className="flex-shrink-0">
+    <Link href={`/${item.slug}`} className="flex-shrink-0">
       <motion.div
         whileHover={{ scale: 1.06, zIndex: 20 }}
         transition={{ duration: 0.25, ease: "easeOut" }}
         className="group relative aspect-[2/3] w-[160px] cursor-pointer overflow-hidden rounded-lg bg-surface shadow-lg sm:w-[180px]"
       >
-        <PosterPlaceholder seed={item.cover || item.slug} title={item.title} className="rounded-lg" icon="book" />
+        <PosterPlaceholder seed={item.cover || item.slug} title={item.title} className="rounded-lg" />
 
         {item.isFree && (
           <div className="absolute left-2 top-2">

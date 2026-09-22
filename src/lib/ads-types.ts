@@ -1,22 +1,14 @@
 export type AdPlacement =
   | "popup"
   | "square"
-  | "under_row"
-  | "player"
   | "libros_home"
-  | "titulo_detalle"
-  | "libro_detalle"
-  | "explorar";
+  | "libro_detalle";
 
 export const AD_PLACEMENT_LABEL: Record<AdPlacement, string> = {
   popup: "Ventana emergente",
   square: "Cuadrado (barra lateral / entre tarjetas)",
-  under_row: "Debajo de las filas de películas",
-  player: "Página del reproductor",
-  libros_home: "Inicio de Butakia Libros",
-  titulo_detalle: "Ficha de película/serie",
+  libros_home: "Inicio de Butakia",
   libro_detalle: "Ficha de libro",
-  explorar: "Página Explorar",
 };
 
 export type AdSizePreset = "responsive" | "300x250" | "728x90" | "160x600" | "320x50";

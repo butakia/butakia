@@ -28,7 +28,6 @@ export default function SiteSettingsForm({ settings }: { settings: SiteSettings 
   const [paypalLink, setPaypalLink] = useState(settings.paypalLink ?? "");
   const [yapeNumber, setYapeNumber] = useState(settings.yapeNumber ?? "");
   const [yapeQrUrl, setYapeQrUrl] = useState(settings.yapeQrUrl ?? "");
-  const [allowGuestPlayback, setAllowGuestPlayback] = useState(settings.allowGuestPlayback);
   const [requireApproval, setRequireApproval] = useState(settings.requireApproval);
   const [totalDonations, setTotalDonations] = useState(String(settings.totalDonations));
   const [donationSharePercent, setDonationSharePercent] = useState(
@@ -46,7 +45,6 @@ export default function SiteSettingsForm({ settings }: { settings: SiteSettings 
   const [librosHeroMessage, setLibrosHeroMessage] = useState(settings.librosHeroMessage);
   const [adsEnabled, setAdsEnabled] = useState(settings.adsEnabled);
   const [donationsEnabled, setDonationsEnabled] = useState(settings.donationsEnabled);
-  const [prerollEnabled, setPrerollEnabled] = useState(settings.prerollEnabled);
   const [pdfUploadEnabled, setPdfUploadEnabled] = useState(settings.pdfUploadEnabled);
   const [fakeVisitorsEnabled, setFakeVisitorsEnabled] = useState(settings.fakeVisitorsEnabled);
   const [fakeVisitorsMin, setFakeVisitorsMin] = useState(String(settings.fakeVisitorsMin));
@@ -82,7 +80,6 @@ export default function SiteSettingsForm({ settings }: { settings: SiteSettings 
         paypalLink,
         yapeNumber,
         yapeQrUrl,
-        allowGuestPlayback,
         requireApproval,
         totalDonations: Number(totalDonations) || 0,
         donationSharePercent: Number(donationSharePercent) || 0,
@@ -98,7 +95,6 @@ export default function SiteSettingsForm({ settings }: { settings: SiteSettings 
         librosHeroMessage,
         adsEnabled,
         donationsEnabled,
-        prerollEnabled,
         pdfUploadEnabled,
         fakeVisitorsEnabled,
         fakeVisitorsMin: Number(fakeVisitorsMin) || 20,
@@ -287,16 +283,6 @@ export default function SiteSettingsForm({ settings }: { settings: SiteSettings 
       </div>
 
       <label className="flex cursor-pointer items-center justify-between rounded-lg border border-white/10 bg-white/[0.03] p-4">
-        <span className="text-sm text-white/80">Permitir reproducción sin registrarse</span>
-        <input
-          type="checkbox"
-          checked={allowGuestPlayback}
-          onChange={(e) => setAllowGuestPlayback(e.target.checked)}
-          className="h-4 w-4 accent-accent"
-        />
-      </label>
-
-      <label className="flex cursor-pointer items-center justify-between rounded-lg border border-white/10 bg-white/[0.03] p-4">
         <span className="text-sm text-white/80">
           Requerir aprobación antes de publicar aportes de usuarios
         </span>
@@ -392,19 +378,6 @@ export default function SiteSettingsForm({ settings }: { settings: SiteSettings 
           Controla si se muestran anuncios (popup, iframes, etc.) de forma independiente a si
           Butakia Premium está activo. Configura los anuncios en sí, sus tipos de iframe y dónde
           aparecen en Admin → Anuncios.
-        </p>
-        <label className="mt-3 flex cursor-pointer items-center justify-between rounded-lg border border-white/10 bg-white/5 px-3.5 py-2.5">
-          <span className="text-xs text-white/70">Cuenta regresiva de 10 segundos antes de reproducir</span>
-          <input
-            type="checkbox"
-            checked={prerollEnabled}
-            onChange={(e) => setPrerollEnabled(e.target.checked)}
-            className="h-4 w-4 accent-accent"
-          />
-        </label>
-        <p className="mt-2 text-[11px] text-white/40">
-          Si está desactivado, el video se reproduce de inmediato sin la pantalla de cuenta
-          regresiva, en todas las películas y series.
         </p>
         <label className="mt-3 flex cursor-pointer items-center justify-between rounded-lg border border-white/10 bg-white/5 px-3.5 py-2.5">
           <span className="text-xs text-white/70">Permitir subir libros en PDF</span>

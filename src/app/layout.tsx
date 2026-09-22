@@ -28,15 +28,15 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     metadataBase: new URL(SITE_URL),
     title: {
-      default: `${settings.siteName} — Ver Películas y Series Online Gratis`,
+      default: `${settings.siteName} — Lee Libros Gratis Online`,
       template: `%s | ${settings.siteName}`,
     },
     description: settings.siteDescription,
     keywords: [
-      "ver películas online gratis",
-      "ver series online gratis",
-      "películas en español latino",
-      "series en español latino",
+      "leer libros gratis online",
+      "libros gratis en español",
+      "novelas gratis online",
+      "cuentos y poesía gratis",
       settings.siteName.toLowerCase(),
     ],
     openGraph: {

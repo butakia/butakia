@@ -23,8 +23,8 @@ export default function TerminosPage() {
 
           <div className="flex flex-col gap-5 text-sm leading-relaxed text-white/60">
             <p>
-              Butakia es una plataforma colaborativa: no aloja archivos de video propios, solo
-              indexa enlaces de reproductores externos que la comunidad comparte voluntariamente.
+              Butakia es una plataforma colaborativa: los libros son subidos voluntariamente por
+              la comunidad, ya sea como texto, PDF o a través del editor enriquecido.
             </p>
             <p>
               Al subir contenido, declaras que el enlace compartido es de acceso público o que

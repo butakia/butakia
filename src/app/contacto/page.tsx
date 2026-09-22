@@ -53,9 +53,9 @@ export default async function ContactoPage() {
               </div>
             )}
             <p className="mt-5 text-sm text-white/50">
-              Para reportar un enlace caído específico, usa el botón{" "}
-              <span className="text-white/80">&ldquo;Reportar servidor caído&rdquo;</span> directamente
-              en la página de reproducción del título — así el equipo puede ubicarlo más rápido.
+              Para reportar un libro específico, usa el botón{" "}
+              <span className="text-white/80">&ldquo;Reportar&rdquo;</span> directamente en la
+              página del libro — así el equipo puede ubicarlo más rápido.
             </p>
           </div>
         </div>

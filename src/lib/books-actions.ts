@@ -31,7 +31,7 @@ async function uniqueBookSlug(base: string): Promise<string> {
 }
 
 function revalidateBooks() {
-  revalidatePath("/libros");
+  revalidatePath("/");
   revalidatePath("/admin/libros");
 }
 
@@ -261,7 +261,7 @@ export async function updateBookAction(slug: string, input: BookFormInput) {
   });
 
   revalidateBooks();
-  revalidatePath(`/libros/${slug}`);
+  revalidatePath(`/${slug}`);
 }
 
 export async function deleteBookAction(slug: string) {
@@ -279,12 +279,12 @@ export async function toggleBookFavoriteAction(bookId: string): Promise<{ favori
   const existing = await prisma.bookFavorite.findFirst({ where: { userId: user.id, bookId, profileId } });
   if (existing) {
     await prisma.bookFavorite.delete({ where: { id: existing.id } });
-    revalidatePath("/libros");
+    revalidatePath("/");
     return { favorited: false };
   }
 
   await prisma.bookFavorite.create({ data: { userId: user.id, bookId, profileId } });
-  revalidatePath("/libros");
+  revalidatePath("/");
   return { favorited: true };
 }
 
@@ -466,7 +466,7 @@ export async function addBookCommentAction(bookId: string, message: string): Pro
   if (trimmed.length > 1000) return { error: "El comentario es demasiado largo (máx. 1000 caracteres)." };
 
   await prisma.bookComment.create({ data: { bookId, userId: user.id, userName: user.name, message: trimmed } });
-  revalidatePath(`/libros`);
+  revalidatePath("/");
   return {};
 }
 
@@ -527,8 +527,8 @@ export async function updateLiteraryAuthorAction(
       ...(data.verified !== undefined ? { verified: data.verified } : {}),
     },
   });
-  revalidatePath("/libros");
-  revalidatePath("/libros/autor");
+  revalidatePath("/");
+  revalidatePath("/autor");
 }
 
 // --- Autor verificado: el propio usuario reclama y edita su perfil de autor ---
@@ -551,12 +551,12 @@ export async function claimAuthorProfileAction(displayName: string): Promise<{ e
       return { error: "Ese nombre de autor ya fue reclamado por otra cuenta." };
     }
     await prisma.literaryAuthor.update({ where: { id: existing.id }, data: { userId: user.id } });
-    revalidatePath(`/libros/autor/${slug}`);
+    revalidatePath(`/autor/${slug}`);
     return { slug };
   }
 
   const created = await prisma.literaryAuthor.create({ data: { slug, name: trimmed, userId: user.id } });
-  revalidatePath(`/libros/autor/${slug}`);
+  revalidatePath(`/autor/${slug}`);
   return { slug: created.slug };
 }
 
@@ -579,8 +579,8 @@ export async function updateMyAuthorProfileAction(data: {
       trajectory: data.trajectory ?? "",
     },
   });
-  revalidatePath(`/libros/autor/${author.slug}`);
-  revalidatePath("/libros/mi-perfil-autor");
+  revalidatePath(`/autor/${author.slug}`);
+  revalidatePath("/mi-perfil-autor");
   return {};
 }
 

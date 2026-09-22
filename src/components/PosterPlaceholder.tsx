@@ -1,4 +1,4 @@
-import { Clapperboard, BookOpen } from "lucide-react";
+import { BookOpen } from "lucide-react";
 
 const PALETTES = [
   ["#3b0d0d", "#0b0b0b"],
@@ -32,13 +32,11 @@ export default function PosterPlaceholder({
   title,
   className,
   iconSize = 28,
-  icon = "movie",
 }: {
   seed: string;
   title: string;
   className?: string;
   iconSize?: number;
-  icon?: "movie" | "book";
 }) {
   if (isRealImage(seed)) {
     return (
@@ -59,11 +57,7 @@ export default function PosterPlaceholder({
       className={`relative flex h-full w-full items-end overflow-hidden ${className ?? ""}`}
       style={{ background: `linear-gradient(160deg, ${from}, ${to})` }}
     >
-      {icon === "book" ? (
-        <BookOpen size={iconSize} className="absolute right-3 top-3 text-white/20" strokeWidth={1.5} />
-      ) : (
-        <Clapperboard size={iconSize} className="absolute right-3 top-3 text-white/20" strokeWidth={1.5} />
-      )}
+      <BookOpen size={iconSize} className="absolute right-3 top-3 text-white/20" strokeWidth={1.5} />
       <span className="line-clamp-3 p-3 text-sm font-semibold text-white/80">{title}</span>
     </div>
   );

@@ -2,20 +2,12 @@ import Link from "next/link";
 import { Pin, MessageCircle } from "lucide-react";
 import { ForumThread } from "@/lib/types";
 
-const CATEGORY_LABEL_BY_SECTION: Record<string, Record<string, string>> = {
-  movies: {
-    general: "General",
-    ayuda: "Ayuda",
-    sugerencias: "Sugerencias",
-    peliculas: "Películas y series",
-  },
-  books: {
-    general: "General",
-    recomendaciones: "Recomendaciones",
-    autores: "Autores",
-    "ayuda-lectura": "Ayuda de lectura",
-    debate: "Debate literario",
-  },
+const CATEGORY_LABEL: Record<string, string> = {
+  general: "General",
+  recomendaciones: "Recomendaciones",
+  autores: "Autores",
+  "ayuda-lectura": "Ayuda de lectura",
+  debate: "Debate literario",
 };
 
 function timeAgo(iso: string): string {
@@ -30,17 +22,7 @@ function timeAgo(iso: string): string {
   return new Date(iso).toLocaleDateString("es-ES");
 }
 
-export default function ForumThreadList({
-  threads,
-  section = "movies",
-  threadBasePath = "/foro",
-}: {
-  threads: ForumThread[];
-  section?: "movies" | "books";
-  threadBasePath?: string;
-}) {
-  const CATEGORY_LABEL = CATEGORY_LABEL_BY_SECTION[section];
-
+export default function ForumThreadList({ threads }: { threads: ForumThread[] }) {
   if (threads.length === 0) {
     return (
       <p className="rounded-xl border border-white/10 bg-white/[0.03] p-10 text-center text-white/40">
@@ -54,7 +36,7 @@ export default function ForumThreadList({
       {threads.map((t) => (
         <Link
           key={t.id}
-          href={`${threadBasePath}/${t.id}`}
+          href={`/foro/${t.id}`}
           className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/[0.03] p-4 transition-colors hover:bg-white/[0.06]"
         >
           <div className="min-w-0">

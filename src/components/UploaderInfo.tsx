@@ -38,7 +38,7 @@ export default function UploaderInfo({
           <Upload size={12} className="text-accent" />
           Subido por <span className="font-semibold text-white hover:underline">{uploader.name}</span>
           {uploader.uploads !== undefined && (
-            <span className="text-white/40">· {uploader.uploads} películas subidas</span>
+            <span className="text-white/40">· {uploader.uploads} libros subidos</span>
           )}
         </span>
       </Link>

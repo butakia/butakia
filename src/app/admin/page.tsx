@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { Film, Tv, Inbox, Eye, Users, TrendingUp, Activity, CalendarDays } from "lucide-react";
-import { getAllTitles, getPendingSubmissions, getContributors } from "@/lib/data";
+import { BookOpen, Inbox, Eye, Users, TrendingUp, Activity, CalendarDays } from "lucide-react";
+import { getContributors } from "@/lib/data";
+import { getAllBooksAdmin, getPendingBookSubmissionsCount } from "@/lib/books-data";
 import { getVisitStats } from "@/lib/visits";
 
 function StatCard({
@@ -32,20 +33,18 @@ function StatCard({
 }
 
 export default async function AdminDashboard() {
-  const [titles, pending, contributors, visitStats] = await Promise.all([
-    getAllTitles(),
-    getPendingSubmissions(),
+  const [books, pendingCount, contributors, visitStats] = await Promise.all([
+    getAllBooksAdmin(),
+    getPendingBookSubmissionsCount(),
     getContributors(),
     getVisitStats(),
   ]);
 
-  const movies = titles.filter((t) => t.type === "movie").length;
-  const series = titles.filter((t) => t.type === "series").length;
-  const totalViews = titles.reduce((sum, t) => sum + (t.views ?? 0), 0);
+  const published = books.filter((b) => b.status === "published").length;
+  const totalViews = books.reduce((sum, b) => sum + (b.views ?? 0), 0);
 
-  const recent = [...titles]
-    .filter((t) => t.addedAt)
-    .sort((a, b) => (b.addedAt! > a.addedAt! ? 1 : -1))
+  const recent = [...books]
+    .sort((a, b) => (b.createdAt > a.createdAt ? 1 : -1))
     .slice(0, 6);
 
   return (
@@ -54,12 +53,11 @@ export default async function AdminDashboard() {
       <p className="mt-1 text-sm text-white/50">Resumen general de Butakia.</p>
 
       <div className="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <StatCard icon={Film} label="Películas" value={movies} />
-        <StatCard icon={Tv} label="Series" value={series} />
-        <StatCard icon={Inbox} label="Pendientes de revisión" value={pending.length} accent />
+        <StatCard icon={BookOpen} label="Libros publicados" value={published} />
+        <StatCard icon={Inbox} label="Envíos pendientes" value={pendingCount} accent />
         <StatCard icon={Eye} label="Vistas totales" value={totalViews.toLocaleString("es-ES")} />
         <StatCard icon={Users} label="Colaboradores" value={contributors.length} />
-        <StatCard icon={TrendingUp} label="Total de títulos" value={titles.length} />
+        <StatCard icon={TrendingUp} label="Total de libros" value={books.length} />
         <StatCard icon={CalendarDays} label="Visitas reales hoy" value={visitStats.today.toLocaleString("es-ES")} accent />
         <StatCard icon={Activity} label="Visitas reales totales" value={visitStats.total.toLocaleString("es-ES")} />
       </div>
@@ -68,41 +66,20 @@ export default async function AdminDashboard() {
         en línea" simulado que puedes activar en Admin → Configuración.
       </p>
 
-      <div className="mt-8 grid gap-6 lg:grid-cols-2">
-        <div className="rounded-xl border border-white/10 bg-white/[0.03] p-5">
-          <h2 className="mb-4 font-bold text-white">Últimos títulos agregados</h2>
-          <div className="space-y-1">
-            {recent.map((t) => (
-              <Link
-                key={t.id}
-                href={`/admin/contenido/${t.slug}/editar`}
-                className="flex items-center justify-between rounded-lg px-2 py-2 text-sm transition-colors hover:bg-white/5"
-              >
-                <span className="truncate text-white/80">{t.title}</span>
-                <span className="shrink-0 text-xs text-white/40">{t.addedAt}</span>
-              </Link>
-            ))}
-            {recent.length === 0 && <p className="text-sm text-white/40">Sin registros aún.</p>}
-          </div>
-        </div>
-
-        <div className="rounded-xl border border-white/10 bg-white/[0.03] p-5">
-          <h2 className="mb-4 font-bold text-white">Pendientes de revisión</h2>
-          <div className="space-y-1">
-            {pending.slice(0, 6).map((p) => (
-              <Link
-                key={p.id}
-                href="/admin/pendientes"
-                className="flex items-center justify-between rounded-lg px-2 py-2 text-sm transition-colors hover:bg-white/5"
-              >
-                <span className="truncate text-white/80">{p.title}</span>
-                <span className="shrink-0 text-xs text-white/40">{p.submittedBy}</span>
-              </Link>
-            ))}
-            {pending.length === 0 && (
-              <p className="text-sm text-white/40">No hay contenido pendiente. 🎉</p>
-            )}
-          </div>
+      <div className="mt-8 rounded-xl border border-white/10 bg-white/[0.03] p-5">
+        <h2 className="mb-4 font-bold text-white">Últimos libros agregados</h2>
+        <div className="space-y-1">
+          {recent.map((b) => (
+            <Link
+              key={b.id}
+              href={`/admin/libros/${b.slug}/editar`}
+              className="flex items-center justify-between rounded-lg px-2 py-2 text-sm transition-colors hover:bg-white/5"
+            >
+              <span className="truncate text-white/80">{b.title}</span>
+              <span className="shrink-0 text-xs text-white/40">{b.createdAt.slice(0, 10)}</span>
+            </Link>
+          ))}
+          {recent.length === 0 && <p className="text-sm text-white/40">Sin registros aún.</p>}
         </div>
       </div>
     </div>

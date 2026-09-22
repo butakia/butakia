@@ -19,7 +19,7 @@ export default function DonateButtons({ settings }: { settings: SiteSettings }) 
           <span>
             ¿Te gustó? Apoya con una donación.
             <span className="block text-xs text-white/40">
-              Nos ayuda a recompensar a los colaboradores que suben películas y actualizan los
+              Nos ayuda a recompensar a los colaboradores que suben libros y actualizan los
               enlaces caídos.
             </span>
           </span>

@@ -44,7 +44,7 @@ export default function AdminBooksTable({ books }: { books: Book[] }) {
             }`}
           >
             <div className="h-16 w-11 shrink-0 overflow-hidden rounded">
-              <PosterPlaceholder seed={b.cover} title="" iconSize={14} icon="book" />
+              <PosterPlaceholder seed={b.cover} title="" iconSize={14} />
             </div>
             <div className="min-w-0 flex-1">
               <p className="truncate font-medium text-white">{b.title}</p>

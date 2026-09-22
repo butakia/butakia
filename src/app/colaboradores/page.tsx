@@ -10,7 +10,7 @@ import { SITE_URL } from "@/lib/constants";
 export const metadata: Metadata = {
   title: "Top Colaboradores",
   description:
-    "Conoce a los colaboradores que más películas y series han subido a Butakia y descubre su contenido.",
+    "Conoce a los colaboradores que más libros han subido a Butakia y descubre su contenido.",
   alternates: { canonical: `${SITE_URL}/colaboradores` },
 };
 
@@ -30,7 +30,7 @@ export default async function ColaboradoresPage() {
             Reconocemos a quienes más alimentan el catálogo de Butakia con sus aportes.
           </p>
           <Link
-            href="/subir"
+            href="/publicar"
             className="mt-5 inline-flex items-center gap-2 rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-white transition-transform hover:scale-105 active:scale-95"
           >
             <Upload size={16} />

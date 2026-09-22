@@ -180,7 +180,7 @@ export default function BookForm({
             phoneNumber,
           });
         }
-        router.push(`/libros/${book.slug}`);
+        router.push(`/${book.slug}`);
       } else {
         await createBookAction(payload);
         router.push("/admin/libros");

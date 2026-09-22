@@ -6,14 +6,15 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ForumReplySection from "@/components/ForumReplySection";
 import ForumThreadActions from "@/components/ForumThreadActions";
-import { getForumThread } from "@/lib/data";
+import { getForumThread, getSiteSettings } from "@/lib/data";
 import { getCurrentUser } from "@/lib/dal";
 
 const CATEGORY_LABEL: Record<string, string> = {
   general: "General",
-  ayuda: "Ayuda",
-  sugerencias: "Sugerencias",
-  peliculas: "Películas y series",
+  recomendaciones: "Recomendaciones",
+  autores: "Autores",
+  "ayuda-lectura": "Ayuda de lectura",
+  debate: "Debate literario",
 };
 
 export async function generateMetadata({
@@ -23,25 +24,29 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { id } = await params;
   const thread = await getForumThread(id);
-  if (!thread) return {};
+  if (!thread || thread.section !== "books") return {};
   return {
     title: thread.title,
     description: thread.body.slice(0, 160),
   };
 }
 
-export default async function ForumThreadPage({
+export default async function LibrosForumThreadPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [thread, user] = await Promise.all([getForumThread(id), getCurrentUser()]);
-  if (!thread) notFound();
+  const [thread, user, settings] = await Promise.all([
+    getForumThread(id),
+    getCurrentUser(),
+    getSiteSettings(),
+  ]);
+  if (!thread || thread.section !== "books") notFound();
 
   return (
     <>
-      <Header />
+      <Header tagline={settings.librosTagline} />
       <main className="flex-1 px-6 pb-16 pt-28 md:px-10">
         <div className="mx-auto max-w-4xl">
           <Link
@@ -68,12 +73,8 @@ export default async function ForumThreadPage({
               />
             </div>
             <h1 className="text-xl font-black text-white md:text-2xl">{thread.title}</h1>
-            <p className="mt-1 text-xs text-white/40">
-              Publicado por {thread.authorName}
-            </p>
-            <p className="mt-4 whitespace-pre-wrap break-words text-sm text-white/70">
-              {thread.body}
-            </p>
+            <p className="mt-1 text-xs text-white/40">Publicado por {thread.authorName}</p>
+            <p className="mt-4 whitespace-pre-wrap break-words text-sm text-white/70">{thread.body}</p>
           </div>
 
           <ForumReplySection

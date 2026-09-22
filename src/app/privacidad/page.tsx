@@ -34,9 +34,9 @@ export default function PrivacidadPage() {
               sitio.
             </p>
             <p>
-              Butakia no aloja archivos de video: solo indexa enlaces de reproductores externos
-              proporcionados por la comunidad. No somos responsables del contenido, disponibilidad
-              o políticas de privacidad de esos servicios de terceros.
+              Los libros en Butakia son subidos y compartidos por la propia comunidad de
+              colaboradores. No somos responsables de verificar por adelantado los derechos de
+              autor de cada obra; para eso existe el sistema de reportes.
             </p>
             <p>
               Puedes solicitar la eliminación de tu cuenta y tus datos en cualquier momento

@@ -90,12 +90,12 @@ export default function BookHeaderSearch() {
               {results.map((r) => (
                 <Link
                   key={r.id}
-                  href={`/libros/${r.slug}`}
+                  href={`/${r.slug}`}
                   onClick={close}
                   className="flex items-center gap-3 p-3 transition-colors hover:bg-white/10"
                 >
                   <div className="h-14 w-10 shrink-0 overflow-hidden rounded">
-                    <PosterPlaceholder seed={r.cover || r.slug} title="" iconSize={14} icon="book" />
+                    <PosterPlaceholder seed={r.cover || r.slug} title="" iconSize={14} />
                   </div>
                   <div className="min-w-0">
                     <p className="truncate text-sm font-medium text-white">{r.title}</p>

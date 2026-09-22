@@ -6,14 +6,7 @@ import Link from "next/link";
 import { Plus, Send, X } from "lucide-react";
 import { createForumThreadAction } from "@/lib/actions";
 
-const MOVIE_CATEGORIES = [
-  { id: "general", label: "General" },
-  { id: "ayuda", label: "Ayuda" },
-  { id: "sugerencias", label: "Sugerencias" },
-  { id: "peliculas", label: "Películas y series" },
-];
-
-const BOOK_CATEGORIES = [
+const CATEGORIES = [
   { id: "general", label: "General" },
   { id: "recomendaciones", label: "Recomendaciones" },
   { id: "autores", label: "Autores" },
@@ -21,17 +14,8 @@ const BOOK_CATEGORIES = [
   { id: "debate", label: "Debate literario" },
 ];
 
-export default function NewThreadForm({
-  isLoggedIn,
-  section = "movies",
-  threadBasePath = "/foro",
-}: {
-  isLoggedIn: boolean;
-  section?: "movies" | "books";
-  threadBasePath?: string;
-}) {
+export default function NewThreadForm({ isLoggedIn }: { isLoggedIn: boolean }) {
   const router = useRouter();
-  const CATEGORIES = section === "books" ? BOOK_CATEGORIES : MOVIE_CATEGORIES;
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
@@ -66,13 +50,13 @@ export default function NewThreadForm({
     e.preventDefault();
     setError(null);
     startTransition(async () => {
-      const result = await createForumThreadAction(title, body, category, section);
+      const result = await createForumThreadAction(title, body, category);
       if (result.error) {
         setError(result.error);
         return;
       }
       if (result.id) {
-        router.push(`${threadBasePath}/${result.id}`);
+        router.push(`/foro/${result.id}`);
       }
     });
   };
